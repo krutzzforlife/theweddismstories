@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Studio Owner Portal | The Weddism Stories</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Cloud Storage, PDF & QR Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style>
+    /* Mobile horizontal overflow & sideways sliding fix */
+    html, body {
+      max-width: 100vw;
+      overflow-x: hidden !important;
+      position: relative;
+      -webkit-overflow-scrolling: touch;
+      margin: 0;
+      padding: 0;
+    }
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    img, svg, video, canvas, iframe {
+      max-width: 100%;
+      height: auto;
+    }
+    :root {
+      --bg-dark: #0f1012;
+      --bg-surface: #17181c;
+      --bg-surface-elevated: #202227;
+      --accent-gold: #c5a059;
+      --accent-gold-hover: #b08c47;
+      --text-white: #ffffff;
+      --text-muted: #94969c;
+      --border-dark: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(197, 160, 89, 0.3);
+      --font-serif: 'Cormorant Garamond', Georgia, serif;
+      --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg-dark); color: var(--text-white); font-family: var(--font-sans); display: flex; min-height: 100vh; }
+    
+    .sidebar { width: 280px; background: var(--bg-surface); border-right: 1px solid var(--border-dark); padding: 32px 20px; display: flex; flex-direction: column; }
+    .brand-title { font-family: var(--font-serif); font-size: 1.35rem; letter-spacing: 0.15em; color: #fff; }
+    .brand-sub { font-size: 0.62rem; letter-spacing: 0.25em; color: var(--accent-gold); text-transform: uppercase; margin-bottom: 32px; }
+    .nav-menu { display: flex; flex-direction: column; gap: 8px; flex-grow: 1; }
+    .nav-btn { background: transparent; border: 1px solid transparent; color: var(--text-muted); padding: 12px 14px; text-align: left; font-size: 0.82rem; cursor: pointer; border-radius: 4px; display: flex; align-items: center; gap: 10px; transition: all 0.2s; }
+    .nav-btn.active, .nav-btn:hover { background: var(--bg-surface-elevated); color: var(--accent-gold); border-color: var(--border-accent); }
+    
+    .main-content { flex-grow: 1; padding: 36px 40px; overflow-y: auto; }
+    .admin-section { display: none; }
+    .admin-section.active { display: block; }
+    .section-heading { font-family: var(--font-serif); font-size: 2.2rem; margin-bottom: 6px; }
+    .section-sub { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 26px; }
+    
+    .admin-card { background: var(--bg-surface); border: 1px solid var(--border-dark); border-radius: 6px; padding: 28px; margin-bottom: 28px; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-bottom: 18px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 0.72rem; letter-spacing: 0.1em; color: var(--accent-gold); text-transform: uppercase; }
+    .form-group input, .form-group select { background: var(--bg-dark); border: 1px solid var(--border-dark); padding: 11px 13px; color: #fff; font-size: 0.88rem; border-radius: 4px; outline: none; }
+    .form-group input:focus { border-color: var(--accent-gold); }
+    
+    .ceremony-checklist { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0 20px 0; }
+    .ceremony-chip { background: var(--bg-dark); border: 1px solid var(--border-dark); padding: 8px 14px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 6px; user-select: none; }
+    .ceremony-chip.selected { background: var(--accent-gold); color: #000; font-weight: 600; border-color: var(--accent-gold); }
+
+    .btn { background: var(--accent-gold); color: #000; border: none; padding: 11px 22px; font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; cursor: pointer; border-radius: 4px; display: inline-flex; align-items: center; gap: 8px; }
+    .btn:hover { background: var(--accent-gold-hover); }
+    .btn-outline { background: transparent; border: 1px solid var(--accent-gold); color: var(--accent-gold); }
+    .btn-outline:hover { background: var(--accent-gold); color: #000; }
+    .btn-danger { background: transparent; border: 1px solid #ff4d4f; color: #ff4d4f; }
+    .btn-danger:hover { background: #ff4d4f; color: #fff; }
+
+    .qr-result-box { display: none; background: var(--bg-surface-elevated); border: 1px solid var(--border-accent); padding: 22px; border-radius: 6px; margin-top: 22px; align-items: center; gap: 28px; }
+    .qr-canvas-holder { background: #fff; padding: 10px; border-radius: 4px; }
+
+    .events-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+    .event-card { background: var(--bg-surface); border: 1px solid var(--border-dark); border-radius: 6px; padding: 22px; display: flex; flex-direction: column; justify-content: space-between; }
+    .event-card h3 { font-family: var(--font-serif); font-size: 1.5rem; margin-bottom: 6px; }
+    .event-card-meta { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px; }
+    .folder-pills-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
+    .folder-pill { background: var(--bg-surface-elevated); border: 1px solid var(--border-dark); font-size: 0.72rem; padding: 4px 8px; border-radius: 3px; color: var(--accent-gold); }
+
+    .manage-modal { position: fixed; inset: 0; background: rgba(10, 11, 13, 0.94); z-index: 500; display: none; padding: 30px; overflow-y: auto; }
+    .manage-modal-inner { max-width: 1100px; margin: 0 auto; background: var(--bg-surface); border: 1px solid var(--border-accent); border-radius: 8px; padding: 32px; }
+    .folder-nav-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0; border-bottom: 1px solid var(--border-dark); padding-bottom: 14px; }
+    .f-tab { background: var(--bg-dark); border: 1px solid var(--border-dark); color: var(--text-muted); padding: 9px 18px; border-radius: 4px; font-size: 0.82rem; cursor: pointer; }
+    .f-tab.active { background: var(--accent-gold); color: #000; font-weight: 600; border-color: var(--accent-gold); }
+    .dropzone { border: 2px dashed var(--border-accent); border-radius: 6px; padding: 26px; text-align: center; background: rgba(197, 160, 89, 0.03); cursor: pointer; margin-bottom: 20px; }
+    .photos-gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; margin-top: 16px; }
+    .photo-cell { position: relative; border-radius: 4px; overflow: hidden; height: 110px; border: 1px solid var(--border-dark); }
+    .photo-cell img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-del-btn { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,0.7); border: none; color: #ff5c5c; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-size: 0.75rem; }
+
+    .site-preview-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border-dark); margin-top: 10px; }
+
+    .quote-table { width: 100%; border-collapse: collapse; margin: 18px 0; }
+    .quote-table th, .quote-table td { padding: 10px 14px; border-bottom: 1px solid var(--border-dark); text-align: left; font-size: 0.85rem; }
+    .quote-table th { color: var(--accent-gold); font-size: 0.72rem; text-transform: uppercase; }
+
+    .gst-switch-wrap { display: flex; align-items: center; gap: 14px; background: var(--bg-dark); padding: 12px 18px; border-radius: 4px; border: 1px solid var(--border-dark); }
+    .gst-btn { padding: 6px 16px; font-size: 0.75rem; border-radius: 3px; cursor: pointer; border: 1px solid transparent; background: transparent; color: var(--text-muted); }
+    .gst-btn.active { background: var(--accent-gold); color: #000; font-weight: 700; }
+
+    #pdf-source-container { position: fixed; top: 0; left: 0; width: 794px; z-index: -9999; opacity: 0; pointer-events: none; background: #ffffff; }
+    .exact-pdf-page { width: 794px; height: 1123px; background: #ffffff; color: #1a1a1a; font-family: 'Plus Jakarta Sans', sans-serif; padding: 50px 48px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; margin: 0; }
+    .pdf-page-cover { background: #0d0e10; color: #ffffff; padding: 40px; }
+    .pdf-cover-frame { width: 100%; height: 100%; border: 1px solid rgba(197, 160, 89, 0.45); padding: 48px 36px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; text-align: center; box-sizing: border-box; }
+    .pdf-cover-logo { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 2.8rem; letter-spacing: 0.22em; color: #ffffff; margin-bottom: 6px; }
+    .pdf-cover-tag { font-size: 0.72rem; letter-spacing: 0.3em; color: var(--accent-gold); text-transform: uppercase; }
+    .pdf-cover-rule { width: 50px; height: 1px; background: var(--accent-gold); margin: 30px auto; }
+    .pdf-cover-for { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: #94969c; margin-bottom: 14px; }
+    .pdf-cover-couple { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 2.9rem; color: var(--accent-gold); margin-bottom: 12px; font-style: italic; }
+    .pdf-cover-meta { font-size: 0.84rem; color: #ffffff; letter-spacing: 0.12em; }
+    .pdf-header-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e8e8e8; padding-bottom: 12px; margin-bottom: 28px; }
+    .pdf-header-logo { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.2rem; letter-spacing: 0.15em; color: #1a1a1a; font-weight: 600; }
+    .pdf-header-quote-id { font-size: 0.75rem; color: #888888; letter-spacing: 0.05em; }
+    .pdf-pitch-title { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 2.1rem; color: #0d0e10; margin-bottom: 8px; line-height: 1.2; }
+    .pdf-pitch-subtitle { font-size: 0.85rem; color: #555555; margin-bottom: 30px; line-height: 1.6; }
+    .pdf-pitch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+    .pdf-pitch-item { border-left: 2px solid var(--accent-gold); padding-left: 14px; }
+    .pdf-pitch-item h4 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.25rem; color: #0d0e10; margin-bottom: 6px; }
+    .pdf-pitch-item p { font-size: 0.78rem; color: #666666; line-height: 1.6; }
+    .pdf-bill-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    .pdf-bill-table th { background: #f8f7f4; padding: 10px 12px; text-align: left; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: #1a1a1a; border-top: 1px solid #0d0e10; border-bottom: 1px solid #0d0e10; }
+    .pdf-bill-table td { padding: 10px 12px; font-size: 0.8rem; border-bottom: 1px solid #eee; color: #333; }
+    .pdf-summary-box { margin-left: auto; width: 270px; border-top: 1px solid #ddd; padding-top: 10px; font-size: 0.82rem; }
+    .pdf-summary-line { display: flex; justify-content: space-between; margin-bottom: 5px; color: #555; }
+    .pdf-summary-line.grand { font-size: 1.1rem; font-weight: 700; color: #0d0e10; border-top: 1px solid #0d0e10; padding-top: 6px; margin-top: 6px; }
+    .pdf-terms { background: #fbf9f5; padding: 14px 16px; border-radius: 4px; font-size: 0.72rem; color: #666; line-height: 1.55; margin-top: 20px; }
+    .pdf-footer-bar { border-top: 1px solid #e5e5e5; padding-top: 12px; display: flex; justify-content: space-between; font-size: 0.7rem; color: #999; }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="brand-title">THE WEDDISM</div>
+    <div class="brand-sub">Studio Owner Portal</div>
+    
+    <nav class="nav-menu">
+      <button class="nav-btn active" onclick="showTab('quotation-portal', this)">
+        <span>📄</span> Proposal &amp; Quotation Maker
+      </button>
+      <button class="nav-btn" onclick="showTab('settings-portal', this)">
+        <span>⚙️</span> Business &amp; Social Links
+      </button>
+      <button class="nav-btn" onclick="showTab('site-content-portal', this)">
+        <span>🖼️</span> Main Website Content
+      </button>
+      <button class="nav-btn" onclick="showTab('qr-portal', this)">
+        <span>➕</span> Create Wedding Event (QR)
+      </button>
+      <button class="nav-btn" onclick="showTab('client-registry', this)">
+        <span>🗂️</span> Active Events &amp; Folders
+      </button>
+    </nav>
+    <a href="index.html" class="btn btn-outline" style="font-size: 0.72rem; justify-content: center; margin-top: 20px;">&larr; View Live Website</a>
+  </aside>
+
+  <main class="main-content">
+
+    <!-- 1. BESPOKE PROPOSAL & QUOTATION MAKER -->
+    <section id="quotation-portal" class="admin-section active">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div>
+          <h1 class="section-heading">Bespoke Proposal &amp; Quotation Maker</h1>
+          <p class="section-sub" style="margin-bottom: 0;">Generate a clean 3-page downloadable wedding proposal PDF.</p>
+        </div>
+        <button class="btn btn-outline" style="font-size: 0.72rem;" onclick="resetQuotationForm()">🔄 Reset / Clear Form</button>
+      </div>
+
+      <div class="admin-card">
+        <h3 style="font-family: var(--font-serif); font-size: 1.4rem; margin-bottom: 16px;">Client &amp; Itinerary Information</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Couple / Client Name</label>
+            <input type="text" id="quote-client-name" placeholder="e.g. Vikram &amp; Pooja">
+          </div>
+          <div class="form-group">
+            <label>Client Phone Number</label>
+            <input type="text" id="quote-client-phone" placeholder="e.g. +91 85198 10904">
+          </div>
+          <div class="form-group">
+            <label>Quotation Number</label>
+            <input type="text" id="quote-number" placeholder="e.g. TWS-2026-01">
+          </div>
+          <div class="form-group">
+            <label>Wedding Date(s)</label>
+            <input type="text" id="quote-event-dates" placeholder="e.g. Dec 14 - Dec 16, 2026">
+          </div>
+          <div class="form-group">
+            <label>Destination / City</label>
+            <input type="text" id="quote-city" placeholder="e.g. Hyderabad (Taj Falaknuma)">
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <h3 style="font-family: var(--font-serif); font-size: 1.4rem;">Coverage Line Items</h3>
+          
+          <div class="gst-switch-wrap">
+            <span style="font-size:0.75rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-gold);">Add 18% GST?</span>
+            <div style="display:flex; gap:4px;">
+              <button type="button" class="gst-btn" id="gst-btn-no" onclick="setGstOption(false)">NO</button>
+              <button type="button" class="gst-btn active" id="gst-btn-yes" onclick="setGstOption(true)">YES (18%)</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-grid" style="background: var(--bg-surface-elevated); padding: 16px; border-radius: 4px;">
+          <div class="form-group" style="grid-column: span 2;">
+            <label>Service Description</label>
+            <input type="text" id="item-desc" placeholder="e.g. Candid Photography + Traditional 4K Video (Haldi &amp; Muhurtham)">
+          </div>
+          <div class="form-group">
+            <label>Days / Qty</label>
+            <input type="number" id="item-qty" placeholder="1" value="1" min="1">
+          </div>
+          <div class="form-group">
+            <label>Rate (₹)</label>
+            <input type="number" id="item-rate" placeholder="e.g. 50000">
+          </div>
+          <div class="form-group" style="justify-content: flex-end;">
+            <button class="btn" type="button" onclick="addQuoteItem()">+ Add Item</button>
+          </div>
+        </div>
+
+        <table class="quote-table" id="quote-table">
+          <thead>
+            <tr><th>Description</th><th>Qty</th><th>Rate (₹)</th><th>Total (₹)</th><th>Action</th></tr>
+          </thead>
+          <tbody id="quote-items-body"></tbody>
+        </table>
+
+        <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+          <div style="width: 280px; display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; justify-content: space-between; color: var(--text-muted);"><span>Subtotal:</span><span id="quote-subtotal">₹0</span></div>
+            <div style="display: flex; justify-content: space-between; color: var(--text-muted);" id="quote-tax-row"><span>GST (18%):</span><span id="quote-tax">₹0</span></div>
+            <div style="display: flex; justify-content: space-between; font-size: 1.15rem; color: var(--accent-gold); font-weight: bold; border-top: 1px solid var(--border-dark); padding-top: 6px;"><span>Grand Total:</span><span id="quote-grand-total">₹0</span></div>
+          </div>
+        </div>
+
+        <div style="margin-top: 28px; display:flex; gap:14px; flex-wrap:wrap;">
+          <button class="btn" id="pdf-download-btn" onclick="downloadLuxuryPdfProposal()">📥 Download PDF Proposal</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. BUSINESS & SOCIAL SETTINGS -->
+    <section id="settings-portal" class="admin-section">
+      <h1 class="section-heading">Business &amp; Social Media Settings</h1>
+      <p class="section-sub">Update contact details and social links. The live customer site updates instantly.</p>
+
+      <div class="admin-card">
+        <h3 style="font-family: var(--font-serif); font-size: 1.5rem; margin-bottom: 16px;">Contact Information</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>WhatsApp Number (e.g. 918519810904)</label>
+            <input type="text" id="setting-whatsapp" placeholder="918519810904">
+          </div>
+          <div class="form-group">
+            <label>Display Phone Number</label>
+            <input type="text" id="setting-phone" placeholder="+91 85198 10904">
+          </div>
+          <div class="form-group">
+            <label>Studio Email Address</label>
+            <input type="email" id="setting-email" placeholder="info@theweddismstories.com">
+          </div>
+          <div class="form-group">
+            <label>Location Description</label>
+            <input type="text" id="setting-location" placeholder="Hyderabad, Telangana • Available Across India">
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <h3 style="font-family: var(--font-serif); font-size: 1.5rem; margin-bottom: 16px;">Social Media URLs</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Instagram URL</label>
+            <input type="url" id="setting-instagram" placeholder="https://instagram.com/yourhandle">
+          </div>
+          <div class="form-group">
+            <label>YouTube Channel URL</label>
+            <input type="url" id="setting-youtube" placeholder="https://youtube.com/@yourchannel">
+          </div>
+          <div class="form-group">
+            <label>Facebook Page URL</label>
+            <input type="url" id="setting-facebook" placeholder="https://facebook.com/yourpage">
+          </div>
+        </div>
+        <button class="btn" onclick="saveBusinessSettings()">Save Settings</button>
+      </div>
+    </section>
+
+    <!-- 3. MAIN WEBSITE CONTENT -->
+    <section id="site-content-portal" class="admin-section">
+      <h1 class="section-heading">Main Website Photo &amp; Video Manager</h1>
+      <p class="section-sub">Upload full-resolution photos directly to Supabase cloud storage.</p>
+
+      <div class="admin-card">
+        <h3 style="font-family: var(--font-serif); font-size: 1.5rem; margin-bottom: 16px;">1. Opening Hero &amp; Intro Photos</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Hero Opening Background Photo</label>
+            <input type="file" accept="image/*" onchange="uploadHeroImage(event)">
+            <img id="hero-preview" class="site-preview-img" src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?q=80&w=1200">
+          </div>
+          <div class="form-group">
+            <label>Philosophy / Intro Editorial Photo</label>
+            <input type="file" accept="image/*" onchange="uploadIntroImage(event)">
+            <img id="intro-preview" class="site-preview-img" src="https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1200">
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <h3 style="font-family: var(--font-serif); font-size: 1.5rem; margin-bottom: 4px;">2. Category Portfolios (Up to 10 Photos Each)</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">Photos are saved into cloud storage and visible on all mobile phones &amp; laptops.</p>
+
+        <div class="folder-nav-tabs" id="site-cat-tabs">
+          <button class="f-tab active" onclick="switchSiteCategory('haldi', this)">Haldi</button>
+          <button class="f-tab" onclick="switchSiteCategory('engagement', this)">Engagement</button>
+          <button class="f-tab" onclick="switchSiteCategory('prewedding', this)">Pre-Wedding</button>
+          <button class="f-tab" onclick="switchSiteCategory('marriage', this)">Marriage</button>
+          <button class="f-tab" onclick="switchSiteCategory('reception', this)">Reception</button>
+          <button class="f-tab" onclick="switchSiteCategory('birthdays', this)">Birthdays / Parties</button>
+          <button class="f-tab" onclick="switchSiteCategory('sangeet', this)">Sangeet</button>
+        </div>
+
+        <div class="dropzone" onclick="document.getElementById('cat-photo-input').click()">
+          <input type="file" id="cat-photo-input" multiple accept="image/*" style="display: none;" onchange="handleCatPhotoUpload(event)">
+          <div style="font-size: 1.8rem; margin-bottom: 4px;">📤</div>
+          <strong>Click to Add Photos to "<span id="active-site-cat-label">Haldi</span>"</strong>
+          <p style="color: var(--text-muted); font-size: 0.78rem; margin-top: 4px;">Uploaded directly to Supabase CDN &bull; Up to 10 photos</p>
+        </div>
+
+        <h4 style="font-size: 1rem; margin-bottom: 12px;">Current Photos in Session (<span id="cat-photos-count">0</span> / 10):</h4>
+        <div class="photos-gallery-grid" id="cat-photos-grid"></div>
+      </div>
+
+      <div class="admin-card">
+        <h3 style="font-family: var(--font-serif); font-size: 1.5rem; margin-bottom: 16px;">3. Cinematic Video Showreels</h3>
+        <div class="form-grid">
+          <div class="form-group" style="grid-column: span 2;">
+            <label>YouTube Link (Paste any standard or share link)</label>
+            <input type="text" id="video-embed-url" placeholder="https://www.youtube.com/watch?v=..." onchange="saveVideoLink()">
+          </div>
+        </div>
+        <button class="btn" onclick="saveVideoLink()">Save Video Showreel</button>
+      </div>
+    </section>
+
+    <!-- 4. CREATE EVENT & MASTER QR -->
+    <section id="qr-portal" class="admin-section">
+      <h1 class="section-heading">Create Wedding Event &amp; Master QR</h1>
+      <p class="section-sub">Create the event with custom ceremony folders and generate the master QR code.</p>
+
+      <div class="admin-card">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Wedding / Event Title</label>
+            <input type="text" id="event-title" placeholder="e.g. Rahul &amp; Sneha Wedding">
+          </div>
+          <div class="form-group">
+            <label>Unique Event Code / Slug</label>
+            <input type="text" id="event-slug" placeholder="e.g. rahul-sneha-2026">
+          </div>
+          <div class="form-group">
+            <label>Tentative Dates</label>
+            <input type="text" id="event-date" placeholder="e.g. Dec 14 - Dec 16, 2026">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 10px;">
+          <label>Select Included Ceremony Folders</label>
+          <div class="ceremony-checklist" id="default-ceremonies">
+            <div class="ceremony-chip selected" data-name="Haldi">✓ Haldi</div>
+            <div class="ceremony-chip selected" data-name="Pellikuthuru">✓ Pellikuthuru</div>
+            <div class="ceremony-chip selected" data-name="Sangeet">✓ Sangeet</div>
+            <div class="ceremony-chip selected" data-name="Marriage">✓ Marriage (Muhurtham)</div>
+            <div class="ceremony-chip selected" data-name="Reception">✓ Reception</div>
+            <div class="ceremony-chip" data-name="Engagement">Engagement</div>
+            <div class="ceremony-chip" data-name="Pre-Wedding">Pre-Wedding</div>
+            <div class="ceremony-chip" data-name="Birthdays">Birthdays</div>
+            <div class="ceremony-chip" data-name="Vratham">Vratham</div>
+          </div>
+        </div>
+
+        <div class="form-group" style="max-width: 400px; margin-bottom: 24px;">
+          <label>+ Add Custom Ceremony Folder</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="custom-folder-input" placeholder="e.g. Cocktail Night">
+            <button type="button" class="btn btn-outline" onclick="addCustomFolderChip()">Add</button>
+          </div>
+        </div>
+
+        <button class="btn" onclick="createNewEventWithQR()">Generate Master Wedding QR</button>
+
+        <div class="qr-result-box" id="qr-result-box">
+          <div class="qr-canvas-holder" id="qr-canvas"></div>
+          <div>
+            <h4 id="qr-event-heading" style="font-size: 1.3rem; margin-bottom: 6px;"></h4>
+            <p id="qr-target-url" style="color: var(--text-muted); font-size: 0.82rem; margin-bottom: 12px; word-break: break-all;"></p>
+            <div style="display: flex; gap: 10px;">
+              <button class="btn btn-outline" onclick="downloadQRCode()">Download QR PNG</button>
+              <button class="btn btn-outline" onclick="copyEventURL()">Copy Guest Link</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. ACTIVE EVENTS LIST -->
+    <section id="client-registry" class="admin-section">
+      <h1 class="section-heading">Active Wedding Events</h1>
+      <p class="section-sub">Manage ceremony folders and upload unlimited ceremony pictures per folder.</p>
+      <div class="events-grid" id="events-card-grid"></div>
+    </section>
+
+  </main>
+
+  <!-- POPUP: EVENT FOLDER & PHOTO MANAGER -->
+  <div class="manage-modal" id="manage-modal">
+    <div class="manage-modal-inner">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <span style="color: var(--accent-gold); font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase;">Ceremony Folder Manager</span>
+          <h2 id="modal-event-title" style="font-family: var(--font-serif); font-size: 2rem; margin-top: 4px;"></h2>
+        </div>
+        <button class="btn btn-outline" onclick="closeManageModal()">Close ✕</button>
+      </div>
+
+      <div class="folder-nav-tabs" id="modal-folder-tabs"></div>
+
+      <div style="display: flex; gap: 10px; margin-bottom: 20px; max-width: 450px;">
+        <input type="text" id="new-inside-folder-name" placeholder="Create new folder (e.g. Pool Party)" style="background: var(--bg-dark); border: 1px solid var(--border-dark); padding: 8px 12px; color: #fff; font-size: 0.85rem; border-radius: 4px; flex-grow: 1;">
+        <button class="btn btn-outline" style="font-size: 0.72rem;" onclick="addFolderToCurrentEvent()">+ Add Folder</button>
+      </div>
+
+      <div class="dropzone" onclick="document.getElementById('modal-file-input').click()">
+        <input type="file" id="modal-file-input" multiple accept="image/*" style="display: none;" onchange="handleModalPhotoUpload(event)">
+        <div style="font-size: 1.8rem; margin-bottom: 4px;">📤</div>
+        <strong>Upload Pictures to "<span id="active-folder-label"></span>" Folder</strong>
+        <p style="color: var(--text-muted); font-size: 0.78rem; margin-top: 4px;">Photos upload directly to cloud storage</p>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h4 style="font-size: 1.1rem;">Ceremony Gallery (<span id="active-photos-count">0</span> photos)</h4>
+        <button class="btn btn-danger" style="font-size: 0.68rem; padding: 6px 12px;" onclick="deleteCurrentFolder()">Delete Folder</button>
+      </div>
+
+      <div class="photos-gallery-grid" id="modal-photos-grid"></div>
+    </div>
+  </div>
+
+  <!-- OFF-SCREEN EXACT 3-PAGE PROPOSAL CONTAINER -->
+  <div id="pdf-source-container">
+    
+    <!-- PAGE 1: COVER -->
+    <div class="exact-pdf-page pdf-page-cover" id="pdf-page-1">
+      <div class="pdf-cover-frame">
+        <div>
+          <h1 class="pdf-cover-logo">THE WEDDISM STORIES</h1>
+          <p class="pdf-cover-tag">LUXURY WEDDING PHOTOGRAPHY &bull; FILMS</p>
+          <div class="pdf-cover-rule"></div>
+        </div>
+        
+        <div>
+          <p class="pdf-cover-for">BESPOKE WEDDING PROPOSAL CRAFTED FOR</p>
+          <h2 class="pdf-cover-couple" id="pdf-cover-couple-name">Client Name</h2>
+          <p class="pdf-cover-meta" id="pdf-cover-event-meta">DECEMBER 2026 &bull; HYDERABAD, INDIA</p>
+        </div>
+
+        <div style="font-size: 0.7rem; color: #888888; letter-spacing: 0.18em; text-transform: uppercase;">
+          CAPTURING FOREVER &bull; WWW.THEWEDDISMSTORIES.COM
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE 2: WHY CHOOSE US -->
+    <div class="exact-pdf-page" id="pdf-page-2">
+      <div>
+        <div class="pdf-header-bar">
+          <span class="pdf-header-logo">THE WEDDISM STORIES</span>
+          <span class="pdf-header-quote-id" id="pdf-page2-quote-id">PROPOSAL</span>
+        </div>
+
+        <h2 class="pdf-pitch-title">Why Couples Choose The Weddism Stories</h2>
+        <p class="pdf-pitch-subtitle">We document celebrations as they truly feel — the laughter, the chaos, the quiet glances, the sacred Vedic rituals, and every unscripted moment in between.</p>
+
+        <div class="pdf-pitch-grid">
+          <div class="pdf-pitch-item">
+            <h4>Archival Color Grading</h4>
+            <p>We avoid harsh artificial filters and fake skin smoothing. Your photographs are mastered with timeless, true-to-life tones that remain elegant decades from now.</p>
+          </div>
+          <div class="pdf-pitch-item">
+            <h4>Dual-Camera Narrative Depth</h4>
+            <p>Our candid photographers and cinematographers capture simultaneous angles — framing intimate moments while documenting full multi-generational family legacies.</p>
+          </div>
+          <div class="pdf-pitch-item">
+            <h4>Unobtrusive Ritual Coverage</h4>
+            <p>We honor sacred rituals without turning your mandap into a noisy film set. We capture authentic emotion with natural lighting and long telephoto lenses.</p>
+          </div>
+          <div class="pdf-pitch-item">
+            <h4>Live QR Ceremony Delivery</h4>
+            <p>Guests receive instant access to ceremony photos via branded QR scan galleries, allowing real-time downloads directly onto their mobile phones.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="pdf-footer-bar">
+        <span>The Weddism Stories &bull; Hyderabad, India</span>
+        <span>Page 02 of 03</span>
+      </div>
+    </div>
+
+    <!-- PAGE 3: COMMERCIAL ESTIMATE & TERMS -->
+    <div class="exact-pdf-page" id="pdf-page-3">
+      <div>
+        <div class="pdf-header-bar">
+          <span class="pdf-header-logo">THE WEDDISM STORIES</span>
+          <span class="pdf-header-quote-id" id="pdf-page3-quote-id">PROPOSAL</span>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <h3 style="font-family:'Cormorant Garamond', serif; font-size:1.8rem; margin-bottom: 2px;">Commercial Estimate &amp; Inclusions</h3>
+          <p style="font-size:0.8rem; color:#666;" id="pdf-client-summary-line">Prepared for Client</p>
+        </div>
+
+        <table class="pdf-bill-table">
+          <thead>
+            <tr>
+              <th>Service / Deliverable Description</th>
+              <th style="text-align:center;">Qty / Days</th>
+              <th style="text-align:right;">Rate (₹)</th>
+              <th style="text-align:right;">Total (₹)</th>
+            </tr>
+          </thead>
+          <tbody id="pdf-bill-tbody"></tbody>
+        </table>
+
+        <div class="pdf-summary-box">
+          <div class="pdf-summary-line"><span>Subtotal:</span><span id="pdf-subtotal">₹0</span></div>
+          <div class="pdf-summary-line" id="pdf-tax-row"><span>GST (18%):</span><span id="pdf-tax">₹0</span></div>
+          <div class="pdf-summary-line grand"><span>Grand Total:</span><span id="pdf-grand-total">₹0</span></div>
+        </div>
+
+        <div class="pdf-terms">
+          <strong>Terms &amp; Deliverables:</strong><br>
+          • <strong>Booking Confirmation:</strong> 50% advance upon contract signing, 40% on event date, and 10% upon final delivery of high-res master files.<br>
+          • <strong>Deliverables:</strong> Raw archival footage, edited high-res digital albums, cinematic 4K wedding film teaser, and full traditional ceremony video cuts.<br>
+          • <strong>Turnaround:</strong> Teaser highlights delivered within 7 working days; complete master albums within 4 to 6 weeks.
+        </div>
+      </div>
+
+      <div class="pdf-footer-bar">
+        <span>Direct: +91 85198 10904 &bull; info@theweddismstories.com</span>
+        <span>Page 03 of 03</span>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // =============================================================
+    // SUPABASE CLOUD CONFIGURATION
+    // =============================================================
+    const SUPABASE_URL = "https://cjmbryvsrjqmyrebazdx.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_KqcsfRzvxQdt3ZGU2bDatw_Nt95p1iK";
+    
+    let supabaseClient = null;
+    if (SUPABASE_KEY && SUPABASE_KEY !== "") {
+      supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    }
+
+    // Direct Cloud Storage Upload Helper
+    async function uploadToCloudStorage(file, path) {
+      if (!supabaseClient) {
+        return new Promise((res) => {
+          const reader = new FileReader();
+          reader.onload = (e) => res(e.target.result);
+          reader.readAsDataURL(file);
+        });
+      }
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${path}_${Date.now()}.${fileExt}`;
+      const { data, error } = await supabaseClient.storage.from('gallery').upload(fileName, file, { upsert: true });
+      if (error) {
+        console.error("Cloud upload error", error);
+        throw error;
+      }
+      const { data: { publicUrl } } = supabaseClient.storage.from('gallery').getPublicUrl(fileName);
+      return publicUrl;
+    }
+
+    function cleanPhoneNumber(raw) {
+      if (!raw) return '918519810904';
+      let digits = raw.replace(/\D/g, '');
+      if (digits.length === 10) {
+        digits = '91' + digits;
+      }
+      return digits || '918519810904';
+    }
+
+    function showTab(id, btn) {
+      document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-menu .nav-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      btn.classList.add('active');
+      if (id === 'client-registry') refreshEventsGrid();
+    }
+
+    // -------------------------------------------------------------
+    // 1. PROPOSAL, QUOTATION & CLEAN PDF ENGINE
+    // -------------------------------------------------------------
+    let quoteItems = [];
+    let includeGst = true;
+
+    function resetQuotationForm() {
+      document.getElementById('quote-client-name').value = '';
+      document.getElementById('quote-client-phone').value = '';
+      document.getElementById('quote-number').value = '';
+      document.getElementById('quote-event-dates').value = '';
+      document.getElementById('quote-city').value = '';
+      document.getElementById('item-desc').value = '';
+      document.getElementById('item-qty').value = '1';
+      document.getElementById('item-rate').value = '';
+      quoteItems = [];
+      renderQuotes();
+    }
+
+    function setGstOption(apply) {
+      includeGst = apply;
+      document.getElementById('gst-btn-yes').classList.toggle('active', apply);
+      document.getElementById('gst-btn-no').classList.toggle('active', !apply);
+      renderQuotes();
+    }
+
+    function addQuoteItem() {
+      const desc = document.getElementById('item-desc').value.trim();
+      const qty = parseFloat(document.getElementById('item-qty').value) || 1;
+      const rate = parseFloat(document.getElementById('item-rate').value) || 0;
+      if (!desc || rate <= 0) { alert('Please enter description and rate'); return; }
+      quoteItems.push({ desc, qty, rate, total: qty * rate });
+      document.getElementById('item-desc').value = '';
+      document.getElementById('item-rate').value = '';
+      renderQuotes();
+    }
+
+    function renderQuotes() {
+      const tbody = document.getElementById('quote-items-body');
+      tbody.innerHTML = '';
+      let sub = 0;
+      quoteItems.forEach((it, idx) => {
+        sub += it.total;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${it.desc}</td><td>${it.qty}</td><td>₹${it.rate.toLocaleString('en-IN')}</td><td>₹${it.total.toLocaleString('en-IN')}</td>
+          <td><button style="background:none;border:none;color:#ff5c5c;cursor:pointer;" onclick="quoteItems.splice(${idx},1);renderQuotes();">✕</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      const tax = includeGst ? sub * 0.18 : 0;
+      const grand = sub + tax;
+
+      document.getElementById('quote-subtotal').textContent = `₹${sub.toLocaleString('en-IN')}`;
+      document.getElementById('quote-tax-row').style.display = includeGst ? 'flex' : 'none';
+      document.getElementById('quote-tax').textContent = `₹${tax.toLocaleString('en-IN')}`;
+      document.getElementById('quote-grand-total').textContent = `₹${grand.toLocaleString('en-IN')}`;
+    }
+
+   async function downloadLuxuryPdfProposal() {
+      if (quoteItems.length === 0) {
+        alert('Please add at least one line item to the quotation before generating the PDF.');
+        return;
+      }
+
+      const btn = document.getElementById('pdf-download-btn');
+      if (btn) {
+        btn.textContent = '⏳ Rendering 3-Page PDF...';
+        btn.disabled = true;
+      }
+
+      const clientName = document.getElementById('quote-client-name')?.value.trim() || 'Valued Client';
+      const quoteNum = document.getElementById('quote-number')?.value.trim() || 'TWS-' + Math.floor(100000 + Math.random() * 900000);
+      const dates = document.getElementById('quote-event-dates')?.value.trim() || 'Upcoming Celebration';
+      const city = document.getElementById('quote-city')?.value.trim() || 'Hyderabad, India';
+      const quoteDate = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+
+      try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4'
+        });
+
+        // Luxury Brand Palette
+        const NAVY_DARK   = [18, 26, 38];     // #121a26 Deep Royal Navy
+        const GOLD_ACCENT = [197, 160, 89];   // #c5a059 Champagne Gold
+        const CHARCOAL    = [45, 45, 45];     // #2d2d2d Text
+        const LIGHT_CREAM = [248, 246, 240];  // #f8f6f0 Luxury Tint Background
+        const WHITE       = [255, 255, 255];
+        const MUTED_GRAY  = [120, 120, 120];
+
+        // Applies full background color, top header, and bottom footer to every page
+        function applyPageBase(pageNum, totalPages) {
+          // 1. Full Page Background Tint
+          doc.setFillColor(...LIGHT_CREAM);
+          doc.rect(0, 0, 210, 297, 'F');
+
+          // 2. Luxury Header Banner
+          doc.setFillColor(...NAVY_DARK);
+          doc.rect(0, 0, 210, 36, 'F');
+
+          // Gold Accent Ribbon
+          doc.setFillColor(...GOLD_ACCENT);
+          doc.rect(0, 36, 210, 1.5, 'F');
+
+          // Studio Branding
+          doc.setFont('times', 'bold');
+          doc.setFontSize(18);
+          doc.setTextColor(...WHITE);
+          doc.text('THE WEDDISM STORIES', 16, 18);
+
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(8);
+          doc.setTextColor(...GOLD_ACCENT);
+          doc.text('LUXURY WEDDING CINEMATOGRAPHY & PHOTOGRAPHY', 16, 25);
+
+          doc.setFontSize(7.5);
+          doc.setTextColor(200, 200, 200);
+          doc.text('Hyderabad, India • theweddismstories.com', 16, 31);
+
+          // Quote Ref & Date
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(8.5);
+          doc.setTextColor(...GOLD_ACCENT);
+          doc.text(`REF: ${quoteNum}`, 194, 20, { align: 'right' });
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(7.5);
+          doc.setTextColor(220, 220, 220);
+          doc.text(`Date: ${quoteDate}`, 194, 28, { align: 'right' });
+
+          // 3. Branded Footer
+          doc.setFillColor(...NAVY_DARK);
+          doc.rect(0, 285, 210, 12, 'F');
+          doc.setFillColor(...GOLD_ACCENT);
+          doc.rect(0, 284.5, 210, 0.5, 'F');
+
+          doc.setFont('times', 'italic');
+          doc.setFontSize(8);
+          doc.setTextColor(...GOLD_ACCENT);
+          doc.text('The Weddism Stories — Crafting Timeless Visual Heirlooms', 16, 292);
+
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(7.5);
+          doc.setTextColor(...WHITE);
+          doc.text(`Page ${pageNum} of ${totalPages}`, 194, 292, { align: 'right' });
+        }
+
+        // ==========================================
+        // PAGE 1: OVERVIEW & CLIENT DETAILS
+        // ==========================================
+        applyPageBase(1, 3);
+
+        doc.setFont('times', 'bold');
+        doc.setFontSize(22);
+        doc.setTextColor(...NAVY_DARK);
+        doc.text('COMMISSION & QUOTATION', 16, 52);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(...MUTED_GRAY);
+        doc.text('A customized photography and cinematography proposal crafted for your celebrations.', 16, 58);
+
+        // Client Info Card
+        doc.setFillColor(...WHITE);
+        doc.roundedRect(16, 66, 178, 48, 3, 3, 'F');
+        doc.setDrawColor(225, 220, 210);
+        doc.roundedRect(16, 66, 178, 48, 3, 3, 'S');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8.5);
+        doc.setTextColor(...GOLD_ACCENT);
+        doc.text('PREPARED FOR', 24, 76);
+
+        doc.setFont('times', 'bold');
+        doc.setFontSize(16);
+        doc.setTextColor(...NAVY_DARK);
+        doc.text(clientName, 24, 85);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(...CHARCOAL);
+        doc.text(`Dates: ${dates}`, 24, 94);
+        doc.text(`Location: ${city}`, 24, 102);
+
+        // Package Summary Card
+        doc.setFillColor(...WHITE);
+        doc.roundedRect(16, 122, 178, 44, 3, 3, 'F');
+        doc.setDrawColor(225, 220, 210);
+        doc.roundedRect(16, 122, 178, 44, 3, 3, 'S');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8.5);
+        doc.setTextColor(...GOLD_ACCENT);
+        doc.text('PROPOSED PRODUCTION SUITE', 24, 132);
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(13);
+        doc.setTextColor(...NAVY_DARK);
+        doc.text('Royal Wedding Cinematography & Photography', 24, 142);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(...CHARCOAL);
+        doc.text('Multi-crew candid captures, 4K wedding films, color grading, and cloud gallery delivery.', 24, 151);
+
+        // Artistic Statement Card
+        doc.setFillColor(...NAVY_DARK);
+        doc.roundedRect(16, 174, 178, 70, 3, 3, 'F');
+
+        doc.setFont('times', 'bold');
+        doc.setFontSize(13);
+        doc.setTextColor(...GOLD_ACCENT);
+        doc.text('OUR ARTISTIC COMMITMENT', 24, 187);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+        doc.setTextColor(230, 230, 230);
+        const p1 = 'At The Weddism Stories, we document celebrations with a cinematic, fine-art editorial perspective. Every frame captures candid emotions, authentic rituals, and timeless aesthetic composition.';
+        const p2 = 'Our complete post-production workflow includes dedicated master color grading, audio synchronization, social teasers, and high-resolution cloud delivery for family and guests.';
+        doc.text(doc.splitTextToSize(p1, 162), 24, 196);
+        doc.text(doc.splitTextToSize(p2, 162), 24, 216);
+
+        // ==========================================
+        // PAGE 2: ITEMIZED DELIVERABLES & PRICING
+        // ==========================================
+        doc.addPage();
+        applyPageBase(2, 3);
+
+        doc.setFont('times', 'bold');
+        doc.setFontSize(18);
+        doc.setTextColor(...NAVY_DARK);
+        doc.text('DELIVERABLES & INVESTMENT BREAKDOWN', 16, 50);
+
+        // Extract items from your quoteItems array
+        let subtotal = 0;
+        const tableRows = quoteItems.map((it, idx) => {
+          subtotal += it.total;
+          return [
+            String(idx + 1).padStart(2, '0'),
+            it.desc,
+            String(it.qty),
+            `₹ ${it.rate.toLocaleString('en-IN')}`,
+            `₹ ${it.total.toLocaleString('en-IN')}`
+          ];
+        });
+
+        const tax = includeGst ? subtotal * 0.18 : 0;
+        const grandTotal = subtotal + tax;
+
+        // AutoTable for Billing
+        doc.autoTable({
+          startY: 58,
+          head: [['#', 'DELIVERABLE DESCRIPTION', 'QTY', 'RATE', 'TOTAL (INR)']],
+          body: tableRows,
+          theme: 'plain',
+          headStyles: {
+            fillColor: NAVY_DARK,
+            textColor: WHITE,
+            font: 'helvetica',
+            fontStyle: 'bold',
+            fontSize: 8,
+            cellPadding: 4.5
+          },
+          bodyStyles: {
+            textColor: CHARCOAL,
+            fontSize: 8,
+            cellPadding: 4.5,
+            lineColor: [225, 220, 210],
+            lineWidth: 0.3
+          },
+          columnStyles: {
+            0: { cellWidth: 10, halign: 'center', textColor: MUTED_GRAY },
+            1: { cellWidth: 'auto' },
+            2: { cellWidth: 14, halign: 'center' },
+            3: { cellWidth: 28, halign: 'right' },
+            4: { cellWidth: 32, halign: 'right', fontStyle: 'bold', textColor: NAVY_DARK }
+          },
+          alternateRowStyles: {
+            fillColor: WHITE
+          },
+          margin: { left: 16, right: 16 }
+        });
+
+        // Totals Box
+        const tableBottomY = doc.lastAutoTable.finalY + 6;
+        doc.setFillColor(...WHITE);
+        doc.roundedRect(104, tableBottomY, 90, includeGst ? 28 : 18, 2, 2, 'F');
+        doc.setDrawColor(225, 220, 210);
+        doc.roundedRect(104, tableBottomY, 90, includeGst ? 28 : 18, 2, 2, 'S');
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(...CHARCOAL);
+        doc.text('Subtotal:', 110, tableBottomY + 7);
+        doc.text(`₹ ${subtotal.toLocaleString('en-IN')}`, 188, tableBottomY + 7, { align: 'right' });
+
+        if (includeGst) {
+          doc.text('GST (18%):', 110, tableBottomY + 14);
+          doc.text(`₹ ${tax.toLocaleString('en-IN')}`, 188, tableBottomY + 14, { align: 'right' });
+        }
+
+        doc.setFillColor(...NAVY_DARK);
+        const barY = includeGst ? tableBottomY + 18 : tableBottomY + 9;
+        doc.roundedRect(104, barY, 90, 10, 1.5, 1.5, 'F');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8.5);
+        doc.setTextColor(...GOLD_ACCENT);
+        doc.text('GRAND TOTAL:', 110, barY + 6.5);
+
+        doc.setTextColor(...WHITE);
+        doc.text(`₹ ${grandTotal.toLocaleString('en-IN')}`, 188, barY + 6.5, { align: 'right' });
+
+        // Delivery Notes Card
+        const notesY = barY + 18;
+        doc.setFillColor(...WHITE);
+        doc.roundedRect(16, notesY, 178, 36, 2, 2, 'F');
+        doc.setDrawColor(225, 220, 210);
+        doc.roundedRect(16, notesY, 178, 36, 2, 2, 'S');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.setTextColor(...GOLD_ACCENT);
+        doc.text('DELIVERY SCHEDULE', 22, notesY + 9);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7.5);
+        doc.setTextColor(...CHARCOAL);
+        doc.text('• Social Media Teaser delivered within 7 to 10 working days.', 22, notesY + 16);
+        doc.text('• Full-Resolution Edited Photos delivered via Cloud QR within 3 weeks.', 22, notesY + 23);
+        doc.text('• Complete 4K Cinematic Wedding Film delivered in 4 to 6 weeks.', 22, notesY + 30);
+
+        // ==========================================
+        // PAGE 3: TERMS, BANKING & SIGNATURES
+        // ==========================================
+        doc.addPage();
+        applyPageBase(3, 3);
+
+        doc.setFont('times', 'bold');
+        doc.setFontSize(18);
+        doc.setTextColor(...NAVY_DARK);
+        doc.text('TERMS OF ENGAGEMENT & ACCEPTANCE', 16, 50);
+
+        // Terms Box
+        doc.setFillColor(...WHITE);
+        doc.roundedRect(16, 58, 178, 74, 2, 2, 'F');
+        doc.setDrawColor(225, 220, 210);
+        doc.roundedRect(16, 58, 178, 74, 2, 2, 'S');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8.5);
+        doc.setTextColor(...GOLD_ACCENT);
+        doc.text('BOOKING POLICIES', 22, 68);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(...CHARCOAL);
+        const terms = [
+          '1. Booking Confirmation: 50% advance deposit is required to reserve the dates.',
+          '2. Balance Payment: Remaining 50% is due upon completion of the shoot.',
+          '3. Travel & Logistics: Outstation logistics are coordinated directly with the client.',
+          '4. Storage: High-resolution masters are archived securely in cloud storage for 12 months.',
+          '5. Raw Files: Full-resolution raw video footage is available upon request.'
+        ];
+        let termY = 76;
+        terms.forEach(t => {
+          doc.text(t, 22, termY);
+          termY += 9;
+        });
+
+        // Banking Info Box
+        doc.setFillColor(...WHITE);
+        doc.roundedRect(16, 140, 178, 42, 2, 2, 'F');
+        doc.setDrawColor(225, 220, 210);
+        doc.roundedRect(16, 140, 178, 42, 2, 2, 'S');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8.5);
+        doc.setTextColor(...GOLD_ACCENT);
+        doc.text('PAYMENT DETAILS', 22, 150);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(...CHARCOAL);
+        doc.text('Account Name: The Weddism Stories', 22, 158);
+        doc.text('Bank: HDFC Bank | Branch: Banjara Hills, Hyderabad', 22, 165);
+        doc.text('UPI ID: theweddismstories@hdfcbank', 22, 172);
+
+        // Signatures Box
+        doc.setFillColor(...WHITE);
+        doc.roundedRect(16, 190, 178, 64, 2, 2, 'F');
+        doc.setDrawColor(225, 220, 210);
+        doc.roundedRect(16, 190, 178, 64, 2, 2, 'S');
+
+        // Client Signature
+        doc.setDrawColor(...MUTED_GRAY);
+        doc.line(26, 230, 86, 230);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7.5);
+        doc.setTextColor(...NAVY_DARK);
+        doc.text('CLIENT ACCEPTANCE SIGNATURE', 26, 236);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7.5);
+        doc.setTextColor(...MUTED_GRAY);
+        doc.text(clientName, 26, 242);
+
+        // Studio Signature
+        doc.setDrawColor(...GOLD_ACCENT);
+        doc.setLineWidth(0.6);
+        doc.line(124, 230, 184, 230);
+        doc.setFont('times', 'bold');
+        doc.setFontSize(8.5);
+        doc.setTextColor(...NAVY_DARK);
+        doc.text('FOR THE WEDDISM STORIES', 124, 236);
+        doc.setFont('times', 'italic');
+        doc.setFontSize(7.5);
+        doc.setTextColor(...GOLD_ACCENT);
+        doc.text('Authorized Signatory', 124, 242);
+
+        // Save the PDF
+        const fileName = `${clientName.replace(/[^a-zA-Z0-9]/g, '_')}_Wedding_Proposal.pdf`;
+        doc.save(fileName);
+
+      } catch (err) {
+        console.error("PDF generation error", err);
+        alert("PDF error: " + err.message);
+      } finally {
+        if (btn) {
+          btn.textContent = '📥 Download PDF Proposal';
+          btn.disabled = false;
+        }
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 2. BUSINESS SETTINGS
+    // -------------------------------------------------------------
+    function loadBusinessSettings() {
+      document.getElementById('setting-whatsapp').value = localStorage.getItem('weddism_setting_whatsapp') || '';
+      document.getElementById('setting-phone').value = localStorage.getItem('weddism_setting_phone') || '';
+      document.getElementById('setting-email').value = localStorage.getItem('weddism_setting_email') || '';
+      document.getElementById('setting-location').value = localStorage.getItem('weddism_setting_location') || '';
+      document.getElementById('setting-instagram').value = localStorage.getItem('weddism_setting_instagram') || '';
+      document.getElementById('setting-youtube').value = localStorage.getItem('weddism_setting_youtube') || '';
+      document.getElementById('setting-facebook').value = localStorage.getItem('weddism_setting_facebook') || '';
+    }
+
+    function saveBusinessSettings() {
+      const rawWa = document.getElementById('setting-whatsapp').value.trim();
+      const sanitizedWa = cleanPhoneNumber(rawWa);
+
+      localStorage.setItem('weddism_setting_whatsapp', sanitizedWa);
+      localStorage.setItem('weddism_setting_phone', document.getElementById('setting-phone').value.trim());
+      localStorage.setItem('weddism_setting_email', document.getElementById('setting-email').value.trim());
+      localStorage.setItem('weddism_setting_location', document.getElementById('setting-location').value.trim());
+      localStorage.setItem('weddism_setting_instagram', document.getElementById('setting-instagram').value.trim());
+      localStorage.setItem('weddism_setting_youtube', document.getElementById('setting-youtube').value.trim());
+      localStorage.setItem('weddism_setting_facebook', document.getElementById('setting-facebook').value.trim());
+      
+      alert(`Settings Saved!\nWhatsApp number configured to: ${sanitizedWa}`);
+    }
+
+    // -------------------------------------------------------------
+    // 3. SITE CONTENT & CATEGORY MANAGER
+    // -------------------------------------------------------------
+    let currentSiteCategory = 'haldi';
+
+    async function initSiteContent() {
+      loadBusinessSettings();
+      renderQuotes();
+
+      if (supabaseClient) {
+        const { data: heroData } = await supabaseClient.from('site_singles').select('value').eq('key', 'hero_img').single();
+        if (heroData) document.getElementById('hero-preview').src = heroData.value;
+
+        const { data: introData } = await supabaseClient.from('site_singles').select('value').eq('key', 'intro_img').single();
+        if (introData) document.getElementById('intro-preview').src = introData.value;
+
+        const { data: vidData } = await supabaseClient.from('site_singles').select('value').eq('key', 'video_url').single();
+        if (vidData && vidData.value) {
+          document.getElementById('video-embed-url').value = vidData.value;
+        }
+      } else {
+        const video = localStorage.getItem('weddism_video_url');
+        if (video) document.getElementById('video-embed-url').value = video;
+      }
+
+      renderSiteCatPhotos();
+    }
+
+    async function uploadHeroImage(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const url = await uploadToCloudStorage(file, 'hero_img');
+      if (supabaseClient) {
+        await supabaseClient.from('site_singles').upsert({ key: 'hero_img', value: url });
+      }
+      document.getElementById('hero-preview').src = url;
+      alert('Hero opening photo uploaded to cloud successfully!');
+    }
+
+    async function uploadIntroImage(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const url = await uploadToCloudStorage(file, 'intro_img');
+      if (supabaseClient) {
+        await supabaseClient.from('site_singles').upsert({ key: 'intro_img', value: url });
+      }
+      document.getElementById('intro-preview').src = url;
+      alert('Philosophy editorial photo uploaded to cloud successfully!');
+    }
+
+    function switchSiteCategory(cat, btn) {
+      currentSiteCategory = cat;
+      document.querySelectorAll('#site-cat-tabs .f-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('active-site-cat-label').textContent = btn.textContent;
+      renderSiteCatPhotos();
+    }
+
+    async function renderSiteCatPhotos() {
+      let photos = [];
+      if (supabaseClient) {
+        const { data } = await supabaseClient.from('site_categories').select('photos').eq('category', currentSiteCategory).single();
+        if (data) photos = data.photos || [];
+      } else {
+        photos = JSON.parse(localStorage.getItem('weddism_cat_' + currentSiteCategory) || '[]');
+      }
+
+      const grid = document.getElementById('cat-photos-grid');
+      document.getElementById('cat-photos-count').textContent = photos.length;
+      grid.innerHTML = '';
+
+      photos.forEach((src, idx) => {
+        const cell = document.createElement('div');
+        cell.className = 'photo-cell';
+        cell.innerHTML = `
+          <img src="${src}">
+          <button class="photo-del-btn" onclick="deleteSiteCatPhoto(${idx})" title="Delete photo">&times;</button>
+        `;
+        grid.appendChild(cell);
+      });
+    }
+
+    async function handleCatPhotoUpload(e) {
+      const files = Array.from(e.target.files);
+      if (files.length === 0) return;
+
+      let photos = [];
+      if (supabaseClient) {
+        const { data } = await supabaseClient.from('site_categories').select('photos').eq('category', currentSiteCategory).single();
+        if (data) photos = data.photos || [];
+      } else {
+        photos = JSON.parse(localStorage.getItem('weddism_cat_' + currentSiteCategory) || '[]');
+      }
+
+      if (photos.length + files.length > 10) {
+        alert(`You can only have up to 10 photos in ${currentSiteCategory}. You already have ${photos.length}.`);
+        return;
+      }
+
+      for (let file of files) {
+        const url = await uploadToCloudStorage(file, `cat_${currentSiteCategory}`);
+        photos.push(url);
+      }
+
+      if (supabaseClient) {
+        await supabaseClient.from('site_categories').upsert({ category: currentSiteCategory, photos: photos });
+      } else {
+        localStorage.setItem('weddism_cat_' + currentSiteCategory, JSON.stringify(photos));
+      }
+
+      renderSiteCatPhotos();
+      document.getElementById('cat-photo-input').value = '';
+    }
+
+    async function deleteSiteCatPhoto(idx) {
+      let photos = [];
+      if (supabaseClient) {
+        const { data } = await supabaseClient.from('site_categories').select('photos').eq('category', currentSiteCategory).single();
+        if (data) photos = data.photos || [];
+      } else {
+        photos = JSON.parse(localStorage.getItem('weddism_cat_' + currentSiteCategory) || '[]');
+      }
+
+      photos.splice(idx, 1);
+
+      if (supabaseClient) {
+        await supabaseClient.from('site_categories').upsert({ category: currentSiteCategory, photos: photos });
+      } else {
+        localStorage.setItem('weddism_cat_' + currentSiteCategory, JSON.stringify(photos));
+      }
+      renderSiteCatPhotos();
+    }
+
+    async function saveVideoLink() {
+      const val = document.getElementById('video-embed-url').value.trim();
+      localStorage.setItem('weddism_video_url', val);
+      if (supabaseClient) {
+        await supabaseClient.from('site_singles').upsert({ key: 'video_url', value: val });
+      }
+      alert('Cinematic Video Showreel link updated!');
+    }
+
+    // -------------------------------------------------------------
+    // 4. QR & EVENT MANAGEMENT
+    // -------------------------------------------------------------
+    document.querySelectorAll('.ceremony-chip').forEach(chip => {
+      chip.addEventListener('click', () => chip.classList.toggle('selected'));
+    });
+
+    function addCustomFolderChip() {
+      const val = document.getElementById('custom-folder-input').value.trim();
+      if (!val) return;
+      const chip = document.createElement('div');
+      chip.className = 'ceremony-chip selected';
+      chip.dataset.name = val;
+      chip.textContent = '✓ ' + val;
+      chip.addEventListener('click', () => chip.classList.toggle('selected'));
+      document.getElementById('default-ceremonies').appendChild(chip);
+      document.getElementById('custom-folder-input').value = '';
+    }
+
+    async function createNewEventWithQR() {
+      const title = document.getElementById('event-title').value.trim() || 'Wedding Festivities';
+      const slug = document.getElementById('event-slug').value.trim() || 'event-' + Date.now();
+      const date = document.getElementById('event-date').value.trim() || '';
+
+      const selectedChips = document.querySelectorAll('.ceremony-chip.selected');
+      const folders = [];
+      selectedChips.forEach(ch => {
+        folders.push({ name: ch.dataset.name, photos: [] });
+      });
+
+      if (folders.length === 0) {
+        folders.push({ name: 'Highlights', photos: [] });
+      }
+
+      const eventData = { slug, title, event_date: date, folders };
+      if (supabaseClient) {
+        await supabaseClient.from('wedding_events').upsert(eventData);
+      } else {
+        localStorage.setItem('weddism_event_' + slug, JSON.stringify(eventData));
+      }
+
+      const currentHost = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+      const targetURL = `${currentHost}/index.html?event=${slug}`;
+
+      const qrHolder = document.getElementById('qr-canvas');
+      qrHolder.innerHTML = '';
+      new QRCode(qrHolder, { text: targetURL, width: 140, height: 140 });
+
+      document.getElementById('qr-event-heading').textContent = title;
+      document.getElementById('qr-target-url').textContent = targetURL;
+      document.getElementById('qr-result-box').style.display = 'flex';
+
+      alert('Event and master QR code created successfully!');
+    }
+
+    function downloadQRCode() {
+      const img = document.querySelector('#qr-canvas img');
+      if (img) {
+        const a = document.createElement('a');
+        a.href = img.src;
+        a.download = 'weddism-event-qr.png';
+        a.click();
+      }
+    }
+
+    function copyEventURL() {
+      navigator.clipboard.writeText(document.getElementById('qr-target-url').textContent);
+      alert('Guest Link copied to clipboard!');
+    }
+
+    async function refreshEventsGrid() {
+      const grid = document.getElementById('events-card-grid');
+      grid.innerHTML = '';
+
+      let eventsList = [];
+      if (supabaseClient) {
+        const { data } = await supabaseClient.from('wedding_events').select('*');
+        if (data) eventsList = data;
+      } else {
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key.startsWith('weddism_event_')) {
+            eventsList.push(JSON.parse(localStorage.getItem(key)));
+          }
+        }
+      }
+
+      for (let item of eventsList) {
+        if (!item.folders) item.folders = [{ name: 'Main Gallery', photos: [] }];
+
+        let totalPhotos = 0;
+        item.folders.forEach(f => totalPhotos += f.photos.length);
+
+        const card = document.createElement('div');
+        card.className = 'event-card';
+        card.innerHTML = `
+          <div>
+            <h3>${item.title}</h3>
+            <div class="event-card-meta">Code: <code>${item.slug}</code> &bull; ${item.event_date || 'Multiple Dates'}</div>
+            <div class="folder-pills-list">
+              ${item.folders.map(f => `<span class="folder-pill">${f.name} (${f.photos.length})</span>`).join('')}
+            </div>
+          </div>
+          <div>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">Total Photos: <strong>${totalPhotos}</strong></p>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn" style="font-size:0.7rem; padding:8px 12px;" onclick="openManageModal('${item.slug}')">📷 Manage Folders &amp; Upload</button>
+              <button class="btn btn-outline" style="font-size:0.7rem; padding:8px 10px;" onclick="showEventQRDirect('${item.slug}', '${item.title}')">QR</button>
+              <button class="btn btn-danger" style="font-size:0.7rem; padding:8px 10px;" onclick="deleteEvent('${item.slug}')">✕</button>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      }
+    }
+
+    async function deleteEvent(slug) {
+      if (confirm('Delete this wedding event and all its ceremony folders?')) {
+        if (supabaseClient) {
+          await supabaseClient.from('wedding_events').delete().eq('slug', slug);
+        } else {
+          localStorage.removeItem('weddism_event_' + slug);
+        }
+        refreshEventsGrid();
+      }
+    }
+
+    function showEventQRDirect(slug, title) {
+      document.getElementById('event-title').value = title;
+      document.getElementById('event-slug').value = slug;
+      showTab('qr-portal', document.querySelectorAll('.nav-menu .nav-btn')[3]);
+      
+      const currentHost = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+      const targetURL = `${currentHost}/index.html?event=${slug}`;
+      const qrHolder = document.getElementById('qr-canvas');
+      qrHolder.innerHTML = '';
+      new QRCode(qrHolder, { text: targetURL, width: 140, height: 140 });
+
+      document.getElementById('qr-event-heading').textContent = title;
+      document.getElementById('qr-target-url').textContent = targetURL;
+      document.getElementById('qr-result-box').style.display = 'flex';
+    }
+
+    let currentActiveEventSlug = null;
+    let currentActiveFolderIdx = 0;
+
+    async function openManageModal(slug) {
+      currentActiveEventSlug = slug;
+      currentActiveFolderIdx = 0;
+      let data = null;
+
+      if (supabaseClient) {
+        const { data: res } = await supabaseClient.from('wedding_events').select('*').eq('slug', slug).single();
+        data = res;
+      } else {
+        data = JSON.parse(localStorage.getItem('weddism_event_' + slug));
+      }
+      
+      if (!data.folders || data.folders.length === 0) {
+        data.folders = [{ name: 'Main Gallery', photos: [] }];
+      }
+
+      document.getElementById('modal-event-title').textContent = data.title;
+      renderModalFolderTabs();
+      document.getElementById('manage-modal').style.display = 'block';
+    }
+
+    function closeManageModal() {
+      document.getElementById('manage-modal').style.display = 'none';
+      refreshEventsGrid();
+    }
+
+    async function renderModalFolderTabs() {
+      let data = null;
+      if (supabaseClient) {
+        const { data: res } = await supabaseClient.from('wedding_events').select('*').eq('slug', currentActiveEventSlug).single();
+        data = res;
+      } else {
+        data = JSON.parse(localStorage.getItem('weddism_event_' + currentActiveEventSlug));
+      }
+
+      const tabsWrap = document.getElementById('modal-folder-tabs');
+      tabsWrap.innerHTML = '';
+
+      data.folders.forEach((folder, idx) => {
+        const tab = document.createElement('button');
+        tab.className = `f-tab ${idx === currentActiveFolderIdx ? 'active' : ''}`;
+        tab.textContent = `${folder.name} (${folder.photos.length})`;
+        tab.onclick = () => {
+          currentActiveFolderIdx = idx;
+          renderModalFolderTabs();
+        };
+        tabsWrap.appendChild(tab);
+      });
+
+      const activeFolder = data.folders[currentActiveFolderIdx] || data.folders[0];
+      document.getElementById('active-folder-label').textContent = activeFolder.name;
+      document.getElementById('active-photos-count').textContent = activeFolder.photos.length;
+
+      renderCurrentFolderPhotos(activeFolder.photos);
+    }
+
+    function renderCurrentFolderPhotos(photos) {
+      const grid = document.getElementById('modal-photos-grid');
+      grid.innerHTML = '';
+      photos.forEach((src, pIdx) => {
+        const cell = document.createElement('div');
+        cell.className = 'photo-cell';
+        cell.innerHTML = `
+          <img src="${src}">
+          <button class="photo-del-btn" onclick="deletePhotoFromCurrentFolder(${pIdx})" title="Delete photo">&times;</button>
+        `;
+        grid.appendChild(cell);
+      });
+    }
+
+    async function addFolderToCurrentEvent() {
+      const val = document.getElementById('new-inside-folder-name').value.trim();
+      if (!val) return;
+      
+      let data = null;
+      if (supabaseClient) {
+        const { data: res } = await supabaseClient.from('wedding_events').select('*').eq('slug', currentActiveEventSlug).single();
+        data = res;
+      } else {
+        data = JSON.parse(localStorage.getItem('weddism_event_' + currentActiveEventSlug));
+      }
+
+      data.folders.push({ name: val, photos: [] });
+
+      if (supabaseClient) {
+        await supabaseClient.from('wedding_events').upsert(data);
+      } else {
+        localStorage.setItem('weddism_event_' + currentActiveEventSlug, JSON.stringify(data));
+      }
+
+      document.getElementById('new-inside-folder-name').value = '';
+      currentActiveFolderIdx = data.folders.length - 1;
+      renderModalFolderTabs();
+    }
+
+    async function deleteCurrentFolder() {
+      let data = null;
+      if (supabaseClient) {
+        const { data: res } = await supabaseClient.from('wedding_events').select('*').eq('slug', currentActiveEventSlug).single();
+        data = res;
+      } else {
+        data = JSON.parse(localStorage.getItem('weddism_event_' + currentActiveEventSlug));
+      }
+
+      if (data.folders.length <= 1) {
+        alert('You must have at least one folder in the event.');
+        return;
+      }
+
+      if (confirm(`Delete folder "${data.folders[currentActiveFolderIdx].name}" and all its photos?`)) {
+        data.folders.splice(currentActiveFolderIdx, 1);
+        currentActiveFolderIdx = 0;
+
+        if (supabaseClient) {
+          await supabaseClient.from('wedding_events').upsert(data);
+        } else {
+          localStorage.setItem('weddism_event_' + currentActiveEventSlug, JSON.stringify(data));
+        }
+
+        renderModalFolderTabs();
+      }
+    }
+
+    async function handleModalPhotoUpload(e) {
+      const files = Array.from(e.target.files);
+      if (files.length === 0) return;
+
+      let data = null;
+      if (supabaseClient) {
+        const { data: res } = await supabaseClient.from('wedding_events').select('*').eq('slug', currentActiveEventSlug).single();
+        data = res;
+      } else {
+        data = JSON.parse(localStorage.getItem('weddism_event_' + currentActiveEventSlug));
+      }
+
+      for (let file of files) {
+        const url = await uploadToCloudStorage(file, `event_${currentActiveEventSlug}_${data.folders[currentActiveFolderIdx].name}`);
+        data.folders[currentActiveFolderIdx].photos.push(url);
+      }
+
+      if (supabaseClient) {
+        await supabaseClient.from('wedding_events').upsert(data);
+      } else {
+        localStorage.setItem('weddism_event_' + currentActiveEventSlug, JSON.stringify(data));
+      }
+
+      renderModalFolderTabs();
+      document.getElementById('modal-file-input').value = '';
+    }
+
+    async function deletePhotoFromCurrentFolder(photoIdx) {
+      let data = null;
+      if (supabaseClient) {
+        const { data: res } = await supabaseClient.from('wedding_events').select('*').eq('slug', currentActiveEventSlug).single();
+        data = res;
+      } else {
+        data = JSON.parse(localStorage.getItem('weddism_event_' + currentActiveEventSlug));
+      }
+
+      data.folders[currentActiveFolderIdx].photos.splice(photoIdx, 1);
+
+      if (supabaseClient) {
+        await supabaseClient.from('wedding_events').upsert(data);
+      } else {
+        localStorage.setItem('weddism_event_' + currentActiveEventSlug, JSON.stringify(data));
+      }
+
+      renderModalFolderTabs();
+    }
+
+    initSiteContent();
+  </script>
+</body>
+</html>
