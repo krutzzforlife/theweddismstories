@@ -7,7 +7,7 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- Cloud Storage, PDF & QR Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -17,7 +17,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <style>
-    /* Mobile horizontal overflow & sideways sliding fix */
     html, body {
       max-width: 100vw;
       overflow-x: hidden !important;
@@ -66,8 +65,8 @@
     .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-bottom: 18px; }
     .form-group { display: flex; flex-direction: column; gap: 6px; }
     .form-group label { font-size: 0.72rem; letter-spacing: 0.1em; color: var(--accent-gold); text-transform: uppercase; }
-    .form-group input, .form-group select { background: var(--bg-dark); border: 1px solid var(--border-dark); padding: 11px 13px; color: #fff; font-size: 0.88rem; border-radius: 4px; outline: none; }
-    .form-group input:focus { border-color: var(--accent-gold); }
+    .form-group input, .form-group select, .form-group textarea { background: var(--bg-dark); border: 1px solid var(--border-dark); padding: 11px 13px; color: #fff; font-size: 0.88rem; border-radius: 4px; outline: none; }
+    .form-group input:focus, .form-group textarea:focus { border-color: var(--accent-gold); }
     
     .ceremony-checklist { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0 20px 0; }
     .ceremony-chip { background: var(--bg-dark); border: 1px solid var(--border-dark); padding: 8px 14px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 6px; user-select: none; }
@@ -101,43 +100,14 @@
     .photo-cell img { width: 100%; height: 100%; object-fit: cover; }
     .photo-del-btn { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,0.7); border: none; color: #ff5c5c; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-size: 0.75rem; }
 
-    .site-preview-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border-dark); margin-top: 10px; }
+    .site-preview-img { width: 100%; max-height: 180px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border-dark); margin-top: 8px; }
 
     .quote-table { width: 100%; border-collapse: collapse; margin: 18px 0; }
     .quote-table th, .quote-table td { padding: 10px 14px; border-bottom: 1px solid var(--border-dark); text-align: left; font-size: 0.85rem; }
     .quote-table th { color: var(--accent-gold); font-size: 0.72rem; text-transform: uppercase; }
 
-    .gst-switch-wrap { display: flex; align-items: center; gap: 14px; background: var(--bg-dark); padding: 12px 18px; border-radius: 4px; border: 1px solid var(--border-dark); }
-    .gst-btn { padding: 6px 16px; font-size: 0.75rem; border-radius: 3px; cursor: pointer; border: 1px solid transparent; background: transparent; color: var(--text-muted); }
-    .gst-btn.active { background: var(--accent-gold); color: #000; font-weight: 700; }
-
-    #pdf-source-container { position: fixed; top: 0; left: 0; width: 794px; z-index: -9999; opacity: 0; pointer-events: none; background: #ffffff; }
-    .exact-pdf-page { width: 794px; height: 1123px; background: #ffffff; color: #1a1a1a; font-family: 'Plus Jakarta Sans', sans-serif; padding: 50px 48px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; margin: 0; }
-    .pdf-page-cover { background: #0d0e10; color: #ffffff; padding: 40px; }
-    .pdf-cover-frame { width: 100%; height: 100%; border: 1px solid rgba(197, 160, 89, 0.45); padding: 48px 36px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; text-align: center; box-sizing: border-box; }
-    .pdf-cover-logo { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 2.8rem; letter-spacing: 0.22em; color: #ffffff; margin-bottom: 6px; }
-    .pdf-cover-tag { font-size: 0.72rem; letter-spacing: 0.3em; color: var(--accent-gold); text-transform: uppercase; }
-    .pdf-cover-rule { width: 50px; height: 1px; background: var(--accent-gold); margin: 30px auto; }
-    .pdf-cover-for { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: #94969c; margin-bottom: 14px; }
-    .pdf-cover-couple { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 2.9rem; color: var(--accent-gold); margin-bottom: 12px; font-style: italic; }
-    .pdf-cover-meta { font-size: 0.84rem; color: #ffffff; letter-spacing: 0.12em; }
-    .pdf-header-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e8e8e8; padding-bottom: 12px; margin-bottom: 28px; }
-    .pdf-header-logo { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.2rem; letter-spacing: 0.15em; color: #1a1a1a; font-weight: 600; }
-    .pdf-header-quote-id { font-size: 0.75rem; color: #888888; letter-spacing: 0.05em; }
-    .pdf-pitch-title { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 2.1rem; color: #0d0e10; margin-bottom: 8px; line-height: 1.2; }
-    .pdf-pitch-subtitle { font-size: 0.85rem; color: #555555; margin-bottom: 30px; line-height: 1.6; }
-    .pdf-pitch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
-    .pdf-pitch-item { border-left: 2px solid var(--accent-gold); padding-left: 14px; }
-    .pdf-pitch-item h4 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.25rem; color: #0d0e10; margin-bottom: 6px; }
-    .pdf-pitch-item p { font-size: 0.78rem; color: #666666; line-height: 1.6; }
-    .pdf-bill-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-    .pdf-bill-table th { background: #f8f7f4; padding: 10px 12px; text-align: left; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: #1a1a1a; border-top: 1px solid #0d0e10; border-bottom: 1px solid #0d0e10; }
-    .pdf-bill-table td { padding: 10px 12px; font-size: 0.8rem; border-bottom: 1px solid #eee; color: #333; }
-    .pdf-summary-box { margin-left: auto; width: 270px; border-top: 1px solid #ddd; padding-top: 10px; font-size: 0.82rem; }
-    .pdf-summary-line { display: flex; justify-content: space-between; margin-bottom: 5px; color: #555; }
-    .pdf-summary-line.grand { font-size: 1.1rem; font-weight: 700; color: #0d0e10; border-top: 1px solid #0d0e10; padding-top: 6px; margin-top: 6px; }
-    .pdf-terms { background: #fbf9f5; padding: 14px 16px; border-radius: 4px; font-size: 0.72rem; color: #666; line-height: 1.55; margin-top: 20px; }
-    .pdf-footer-bar { border-top: 1px solid #e5e5e5; padding-top: 12px; display: flex; justify-content: space-between; font-size: 0.7rem; color: #999; }
+    .proposal-photo-box { background: var(--bg-surface-elevated); border: 1px dashed var(--border-accent); border-radius: 6px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+    .proposal-photo-box img { width: 100%; height: 110px; object-fit: cover; border-radius: 4px; background: #0b0c0e; border: 1px solid var(--border-dark); }
   </style>
 </head>
 <body>
@@ -173,85 +143,137 @@
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <div>
           <h1 class="section-heading">Bespoke Proposal &amp; Quotation Maker</h1>
-          <p class="section-sub" style="margin-bottom: 0;">Generate a clean 3-page downloadable wedding proposal PDF.</p>
+          <p class="section-sub" style="margin-bottom: 0;">Generate the exact 5-page editorial proposal PDF matching your client template.</p>
         </div>
-        <button class="btn btn-outline" style="font-size: 0.72rem;" onclick="resetQuotationForm()">🔄 Reset / Clear Form</button>
+        <button class="btn btn-outline" style="font-size: 0.72rem;" onclick="resetQuotationForm()">🔄 Reset Form</button>
       </div>
 
+      <!-- 1. CLIENT & EVENT DETAILS -->
       <div class="admin-card">
-        <h3 style="font-family: var(--font-serif); font-size: 1.4rem; margin-bottom: 16px;">Client &amp; Itinerary Information</h3>
+        <h3 style="font-family: var(--font-serif); font-size: 1.4rem; margin-bottom: 16px;">1. Client &amp; Event Details</h3>
         <div class="form-grid">
           <div class="form-group">
-            <label>Couple / Client Name</label>
-            <input type="text" id="quote-client-name" placeholder="e.g. Vikram &amp; Pooja">
+            <label>Prepared For (Client Name)</label>
+            <input type="text" id="quote-client-name" placeholder="e.g. Rahul &amp; Sneha">
           </div>
           <div class="form-group">
-            <label>Client Phone Number</label>
-            <input type="text" id="quote-client-phone" placeholder="e.g. +91 85198 10904">
+            <label>Presented By</label>
+            <input type="text" id="quote-presented-by" placeholder="e.g. TWS Studio" value="TWS Studio">
           </div>
           <div class="form-group">
-            <label>Quotation Number</label>
-            <input type="text" id="quote-number" placeholder="e.g. TWS-2026-01">
-          </div>
-          <div class="form-group">
-            <label>Wedding Date(s)</label>
+            <label>Event Dates / Timeline</label>
             <input type="text" id="quote-event-dates" placeholder="e.g. Dec 14 - Dec 16, 2026">
           </div>
           <div class="form-group">
-            <label>Destination / City</label>
-            <input type="text" id="quote-city" placeholder="e.g. Hyderabad (Taj Falaknuma)">
+            <label>Location / Destination</label>
+            <input type="text" id="quote-city" placeholder="e.g. Hyderabad, India">
           </div>
         </div>
       </div>
 
+      <!-- 2. PROPOSAL PHOTOS (PAGE 2 ABOUT US SECTION) -->
       <div class="admin-card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-          <h3 style="font-family: var(--font-serif); font-size: 1.4rem;">Coverage Line Items</h3>
-          
-          <div class="gst-switch-wrap">
-            <span style="font-size:0.75rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--accent-gold);">Add 18% GST?</span>
-            <div style="display:flex; gap:4px;">
-              <button type="button" class="gst-btn" id="gst-btn-no" onclick="setGstOption(false)">NO</button>
-              <button type="button" class="gst-btn active" id="gst-btn-yes" onclick="setGstOption(true)">YES (18%)</button>
-            </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <div>
+            <h3 style="font-family: var(--font-serif); font-size: 1.4rem;">2. Proposal Photos (Page 2 'About Us' Collage)</h3>
+            <p style="color: var(--text-muted); font-size: 0.8rem;">Upload specific photos for this client, or leave blank to automatically use your website showcase pictures.</p>
           </div>
+          <button type="button" class="btn btn-outline" style="font-size: 0.68rem; padding: 6px 12px;" onclick="clearProposalPhotos()">Clear Photos</button>
         </div>
 
-        <div class="form-grid" style="background: var(--bg-surface-elevated); padding: 16px; border-radius: 4px;">
-          <div class="form-group" style="grid-column: span 2;">
-            <label>Service Description</label>
-            <input type="text" id="item-desc" placeholder="e.g. Candid Photography + Traditional 4K Video (Haldi &amp; Muhurtham)">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+          <!-- Photo 1: Left Main Hero -->
+          <div class="proposal-photo-box">
+            <label style="font-size:0.75rem; color:var(--accent-gold); font-weight:600;">1. Left Main Photo (Vertical/Hero)</label>
+            <input type="file" accept="image/*" onchange="previewProposalPhoto(event, 'quote-photo-1')">
+            <img id="quote-photo-1" src="" style="display:none;" alt="Photo 1 Preview">
+            <span id="quote-photo-1-status" style="font-size:0.72rem; color:var(--text-muted);">Default: Main Website Hero Photo</span>
           </div>
-          <div class="form-group">
-            <label>Days / Qty</label>
-            <input type="number" id="item-qty" placeholder="1" value="1" min="1">
+
+          <!-- Photo 2: Top Right Landscape -->
+          <div class="proposal-photo-box">
+            <label style="font-size:0.75rem; color:var(--accent-gold); font-weight:600;">2. Top-Right Photo (e.g. Rings / Haldi)</label>
+            <input type="file" accept="image/*" onchange="previewProposalPhoto(event, 'quote-photo-2')">
+            <img id="quote-photo-2" src="" style="display:none;" alt="Photo 2 Preview">
+            <span id="quote-photo-2-status" style="font-size:0.72rem; color:var(--text-muted);">Default: Website Intro / Rituals Photo</span>
           </div>
-          <div class="form-group">
-            <label>Rate (₹)</label>
-            <input type="number" id="item-rate" placeholder="e.g. 50000">
-          </div>
-          <div class="form-group" style="justify-content: flex-end;">
-            <button class="btn" type="button" onclick="addQuoteItem()">+ Add Item</button>
+
+          <!-- Photo 3: Bottom Right Landscape -->
+          <div class="proposal-photo-box">
+            <label style="font-size:0.75rem; color:var(--accent-gold); font-weight:600;">3. Bottom-Right Photo (e.g. Wedding / Mandap)</label>
+            <input type="file" accept="image/*" onchange="previewProposalPhoto(event, 'quote-photo-3')">
+            <img id="quote-photo-3" src="" style="display:none;" alt="Photo 3 Preview">
+            <span id="quote-photo-3-status" style="font-size:0.72rem; color:var(--text-muted);">Default: Ceremony Gallery Highlights</span>
           </div>
         </div>
+      </div>
 
-        <table class="quote-table" id="quote-table">
+      <!-- 3. DELIVERABLES & WHAT YOU RECEIVE -->
+      <div class="admin-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h3 style="font-family: var(--font-serif); font-size: 1.4rem;">3. Deliverables ("What You Receive")</h3>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Shown on Page 4 of PDF</span>
+        </div>
+        <table class="quote-table">
           <thead>
-            <tr><th>Description</th><th>Qty</th><th>Rate (₹)</th><th>Total (₹)</th><th>Action</th></tr>
+            <tr>
+              <th>Deliverable Item</th>
+              <th style="width: 70px;">Action</th>
+            </tr>
           </thead>
-          <tbody id="quote-items-body"></tbody>
+          <tbody id="quote-deliverables-tbody"></tbody>
         </table>
 
-        <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
-          <div style="width: 280px; display: flex; flex-direction: column; gap: 6px;">
-            <div style="display: flex; justify-content: space-between; color: var(--text-muted);"><span>Subtotal:</span><span id="quote-subtotal">₹0</span></div>
-            <div style="display: flex; justify-content: space-between; color: var(--text-muted);" id="quote-tax-row"><span>GST (18%):</span><span id="quote-tax">₹0</span></div>
-            <div style="display: flex; justify-content: space-between; font-size: 1.15rem; color: var(--accent-gold); font-weight: bold; border-top: 1px solid var(--border-dark); padding-top: 6px;"><span>Grand Total:</span><span id="quote-grand-total">₹0</span></div>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+          <input type="text" id="new-deliverable-desc" placeholder="e.g. 4 Cinematic Teasers (4K)" style="background: var(--bg-dark); border: 1px solid var(--border-dark); padding: 9px 13px; color: #fff; font-size: 0.88rem; border-radius: 4px; flex-grow: 1;">
+          <button type="button" class="btn btn-outline" onclick="addDeliverableItem()">+ Add Deliverable</button>
+        </div>
+      </div>
+
+      <!-- 4. PRICING & SPECIAL OFFER -->
+      <div class="admin-card">
+        <h3 style="font-family: var(--font-serif); font-size: 1.4rem; margin-bottom: 16px;">4. Pricing &amp; Special Offer Package</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Regular Package Price (₹)</label>
+            <input type="number" id="quote-regular-price" placeholder="e.g. 310000" oninput="updatePricingDisplays()">
+          </div>
+          <div class="form-group">
+            <label>Special Offer Price (₹)</label>
+            <input type="number" id="quote-special-price" placeholder="e.g. 225000" oninput="updatePricingDisplays()">
+          </div>
+          <div class="form-group">
+            <label>Calculated Savings (₹)</label>
+            <input type="text" id="quote-savings-display" placeholder="₹0/-" readonly style="background:#111; color:var(--accent-gold); font-weight:bold;">
           </div>
         </div>
+      </div>
 
-        <div style="margin-top: 28px; display:flex; gap:14px; flex-wrap:wrap;">
-          <button class="btn" id="pdf-download-btn" onclick="downloadLuxuryPdfProposal()">📥 Download PDF Proposal</button>
+      <!-- 5. TERMS & CONDITIONS (PERSON-TO-PERSON EDITABLE) -->
+      <div class="admin-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h3 style="font-family: var(--font-serif); font-size: 1.4rem;">5. Terms &amp; Conditions (Editable Per Client)</h3>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Shown on Page 5 of PDF</span>
+        </div>
+        <table class="quote-table">
+          <thead>
+            <tr>
+              <th style="width: 220px;">Clause Title</th>
+              <th>Description / Terms</th>
+              <th style="width: 70px;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="quote-terms-tbody"></tbody>
+        </table>
+
+        <div style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
+          <input type="text" id="new-term-title" placeholder="e.g. PAYMENT SCHEDULE" style="background: var(--bg-dark); border: 1px solid var(--border-dark); padding: 9px 13px; color: #fff; font-size: 0.88rem; border-radius: 4px; width: 220px;">
+          <input type="text" id="new-term-desc" placeholder="e.g. 50% Advance at booking, 40% on event day, 10% on delivery." style="background: var(--bg-dark); border: 1px solid var(--border-dark); padding: 9px 13px; color: #fff; font-size: 0.88rem; border-radius: 4px; flex-grow: 1;">
+          <button type="button" class="btn btn-outline" onclick="addTermItem()">+ Add Clause</button>
+        </div>
+
+        <div style="margin-top: 26px;">
+          <button class="btn" id="pdf-download-btn" onclick="downloadLuxuryPdfProposal()">📥 Download Exact 5-Page Proposal PDF</button>
         </div>
       </div>
     </section>
@@ -270,11 +292,11 @@
           </div>
           <div class="form-group">
             <label>Display Phone Number</label>
-            <input type="text" id="setting-phone" placeholder="+91 85198 10904">
+            <input type="text" id="setting-phone" placeholder="+91 76600 82214">
           </div>
           <div class="form-group">
             <label>Studio Email Address</label>
-            <input type="email" id="setting-email" placeholder="info@theweddismstories.com">
+            <input type="email" id="setting-email" placeholder="hello@theweddismstories.com">
           </div>
           <div class="form-group">
             <label>Location Description</label>
@@ -288,15 +310,15 @@
         <div class="form-grid">
           <div class="form-group">
             <label>Instagram URL</label>
-            <input type="url" id="setting-instagram" placeholder="https://instagram.com/yourhandle">
+            <input type="url" id="setting-instagram" placeholder="https://instagram.com/theweddismstories">
           </div>
           <div class="form-group">
             <label>YouTube Channel URL</label>
-            <input type="url" id="setting-youtube" placeholder="https://youtube.com/@yourchannel">
+            <input type="url" id="setting-youtube" placeholder="https://youtube.com/@theweddismstories">
           </div>
           <div class="form-group">
             <label>Facebook Page URL</label>
-            <input type="url" id="setting-facebook" placeholder="https://facebook.com/yourpage">
+            <input type="url" id="setting-facebook" placeholder="https://facebook.com/theweddismstories">
           </div>
         </div>
         <button class="btn" onclick="saveBusinessSettings()">Save Settings</button>
@@ -464,114 +486,6 @@
     </div>
   </div>
 
-  <!-- OFF-SCREEN EXACT 3-PAGE PROPOSAL CONTAINER -->
-  <div id="pdf-source-container">
-    
-    <!-- PAGE 1: COVER -->
-    <div class="exact-pdf-page pdf-page-cover" id="pdf-page-1">
-      <div class="pdf-cover-frame">
-        <div>
-          <h1 class="pdf-cover-logo">THE WEDDISM STORIES</h1>
-          <p class="pdf-cover-tag">LUXURY WEDDING PHOTOGRAPHY &bull; FILMS</p>
-          <div class="pdf-cover-rule"></div>
-        </div>
-        
-        <div>
-          <p class="pdf-cover-for">BESPOKE WEDDING PROPOSAL CRAFTED FOR</p>
-          <h2 class="pdf-cover-couple" id="pdf-cover-couple-name">Client Name</h2>
-          <p class="pdf-cover-meta" id="pdf-cover-event-meta">DECEMBER 2026 &bull; HYDERABAD, INDIA</p>
-        </div>
-
-        <div style="font-size: 0.7rem; color: #888888; letter-spacing: 0.18em; text-transform: uppercase;">
-          CAPTURING FOREVER &bull; WWW.THEWEDDISMSTORIES.COM
-        </div>
-      </div>
-    </div>
-
-    <!-- PAGE 2: WHY CHOOSE US -->
-    <div class="exact-pdf-page" id="pdf-page-2">
-      <div>
-        <div class="pdf-header-bar">
-          <span class="pdf-header-logo">THE WEDDISM STORIES</span>
-          <span class="pdf-header-quote-id" id="pdf-page2-quote-id">PROPOSAL</span>
-        </div>
-
-        <h2 class="pdf-pitch-title">Why Couples Choose The Weddism Stories</h2>
-        <p class="pdf-pitch-subtitle">We document celebrations as they truly feel — the laughter, the chaos, the quiet glances, the sacred Vedic rituals, and every unscripted moment in between.</p>
-
-        <div class="pdf-pitch-grid">
-          <div class="pdf-pitch-item">
-            <h4>Archival Color Grading</h4>
-            <p>We avoid harsh artificial filters and fake skin smoothing. Your photographs are mastered with timeless, true-to-life tones that remain elegant decades from now.</p>
-          </div>
-          <div class="pdf-pitch-item">
-            <h4>Dual-Camera Narrative Depth</h4>
-            <p>Our candid photographers and cinematographers capture simultaneous angles — framing intimate moments while documenting full multi-generational family legacies.</p>
-          </div>
-          <div class="pdf-pitch-item">
-            <h4>Unobtrusive Ritual Coverage</h4>
-            <p>We honor sacred rituals without turning your mandap into a noisy film set. We capture authentic emotion with natural lighting and long telephoto lenses.</p>
-          </div>
-          <div class="pdf-pitch-item">
-            <h4>Live QR Ceremony Delivery</h4>
-            <p>Guests receive instant access to ceremony photos via branded QR scan galleries, allowing real-time downloads directly onto their mobile phones.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="pdf-footer-bar">
-        <span>The Weddism Stories &bull; Hyderabad, India</span>
-        <span>Page 02 of 03</span>
-      </div>
-    </div>
-
-    <!-- PAGE 3: COMMERCIAL ESTIMATE & TERMS -->
-    <div class="exact-pdf-page" id="pdf-page-3">
-      <div>
-        <div class="pdf-header-bar">
-          <span class="pdf-header-logo">THE WEDDISM STORIES</span>
-          <span class="pdf-header-quote-id" id="pdf-page3-quote-id">PROPOSAL</span>
-        </div>
-
-        <div style="margin-bottom: 20px;">
-          <h3 style="font-family:'Cormorant Garamond', serif; font-size:1.8rem; margin-bottom: 2px;">Commercial Estimate &amp; Inclusions</h3>
-          <p style="font-size:0.8rem; color:#666;" id="pdf-client-summary-line">Prepared for Client</p>
-        </div>
-
-        <table class="pdf-bill-table">
-          <thead>
-            <tr>
-              <th>Service / Deliverable Description</th>
-              <th style="text-align:center;">Qty / Days</th>
-              <th style="text-align:right;">Rate (₹)</th>
-              <th style="text-align:right;">Total (₹)</th>
-            </tr>
-          </thead>
-          <tbody id="pdf-bill-tbody"></tbody>
-        </table>
-
-        <div class="pdf-summary-box">
-          <div class="pdf-summary-line"><span>Subtotal:</span><span id="pdf-subtotal">₹0</span></div>
-          <div class="pdf-summary-line" id="pdf-tax-row"><span>GST (18%):</span><span id="pdf-tax">₹0</span></div>
-          <div class="pdf-summary-line grand"><span>Grand Total:</span><span id="pdf-grand-total">₹0</span></div>
-        </div>
-
-        <div class="pdf-terms">
-          <strong>Terms &amp; Deliverables:</strong><br>
-          • <strong>Booking Confirmation:</strong> 50% advance upon contract signing, 40% on event date, and 10% upon final delivery of high-res master files.<br>
-          • <strong>Deliverables:</strong> Raw archival footage, edited high-res digital albums, cinematic 4K wedding film teaser, and full traditional ceremony video cuts.<br>
-          • <strong>Turnaround:</strong> Teaser highlights delivered within 7 working days; complete master albums within 4 to 6 weeks.
-        </div>
-      </div>
-
-      <div class="pdf-footer-bar">
-        <span>Direct: +91 85198 10904 &bull; info@theweddismstories.com</span>
-        <span>Page 03 of 03</span>
-      </div>
-    </div>
-
-  </div>
-
   <script>
     // =============================================================
     // SUPABASE CLOUD CONFIGURATION
@@ -584,7 +498,6 @@
       supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     }
 
-    // Direct Cloud Storage Upload Helper
     async function uploadToCloudStorage(file, path) {
       if (!supabaseClient) {
         return new Promise((res) => {
@@ -622,428 +535,775 @@
     }
 
     // -------------------------------------------------------------
-    // 1. PROPOSAL, QUOTATION & CLEAN PDF ENGINE
+    // PROPOSAL PHOTOS MANAGEMENT
     // -------------------------------------------------------------
-    let quoteItems = [];
-    let includeGst = true;
+    let customProposalPhotos = { photo1: null, photo2: null, photo3: null };
 
-    function resetQuotationForm() {
-      document.getElementById('quote-client-name').value = '';
-      document.getElementById('quote-client-phone').value = '';
-      document.getElementById('quote-number').value = '';
-      document.getElementById('quote-event-dates').value = '';
-      document.getElementById('quote-city').value = '';
-      document.getElementById('item-desc').value = '';
-      document.getElementById('item-qty').value = '1';
-      document.getElementById('item-rate').value = '';
-      quoteItems = [];
-      renderQuotes();
+    function previewProposalPhoto(e, previewId) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = document.getElementById(previewId);
+        img.src = event.target.result;
+        img.style.display = 'block';
+
+        if (previewId === 'quote-photo-1') {
+          customProposalPhotos.photo1 = event.target.result;
+          document.getElementById('quote-photo-1-status').textContent = 'Custom Photo Loaded ✓';
+        } else if (previewId === 'quote-photo-2') {
+          customProposalPhotos.photo2 = event.target.result;
+          document.getElementById('quote-photo-2-status').textContent = 'Custom Photo Loaded ✓';
+        } else if (previewId === 'quote-photo-3') {
+          customProposalPhotos.photo3 = event.target.result;
+          document.getElementById('quote-photo-3-status').textContent = 'Custom Photo Loaded ✓';
+        }
+      };
+      reader.readAsDataURL(file);
     }
 
-    function setGstOption(apply) {
-      includeGst = apply;
-      document.getElementById('gst-btn-yes').classList.toggle('active', apply);
-      document.getElementById('gst-btn-no').classList.toggle('active', !apply);
-      renderQuotes();
-    }
-
-    function addQuoteItem() {
-      const desc = document.getElementById('item-desc').value.trim();
-      const qty = parseFloat(document.getElementById('item-qty').value) || 1;
-      const rate = parseFloat(document.getElementById('item-rate').value) || 0;
-      if (!desc || rate <= 0) { alert('Please enter description and rate'); return; }
-      quoteItems.push({ desc, qty, rate, total: qty * rate });
-      document.getElementById('item-desc').value = '';
-      document.getElementById('item-rate').value = '';
-      renderQuotes();
-    }
-
-    function renderQuotes() {
-      const tbody = document.getElementById('quote-items-body');
-      tbody.innerHTML = '';
-      let sub = 0;
-      quoteItems.forEach((it, idx) => {
-        sub += it.total;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${it.desc}</td><td>${it.qty}</td><td>₹${it.rate.toLocaleString('en-IN')}</td><td>₹${it.total.toLocaleString('en-IN')}</td>
-          <td><button style="background:none;border:none;color:#ff5c5c;cursor:pointer;" onclick="quoteItems.splice(${idx},1);renderQuotes();">✕</button></td>
-        `;
-        tbody.appendChild(tr);
+    function clearProposalPhotos() {
+      customProposalPhotos = { photo1: null, photo2: null, photo3: null };
+      ['quote-photo-1', 'quote-photo-2', 'quote-photo-3'].forEach((id, idx) => {
+        const img = document.getElementById(id);
+        if (img) {
+          img.src = '';
+          img.style.display = 'none';
+        }
       });
-
-      const tax = includeGst ? sub * 0.18 : 0;
-      const grand = sub + tax;
-
-      document.getElementById('quote-subtotal').textContent = `₹${sub.toLocaleString('en-IN')}`;
-      document.getElementById('quote-tax-row').style.display = includeGst ? 'flex' : 'none';
-      document.getElementById('quote-tax').textContent = `₹${tax.toLocaleString('en-IN')}`;
-      document.getElementById('quote-grand-total').textContent = `₹${grand.toLocaleString('en-IN')}`;
+      document.getElementById('quote-photo-1-status').textContent = 'Default: Main Website Hero Photo';
+      document.getElementById('quote-photo-2-status').textContent = 'Default: Website Intro / Rituals Photo';
+      document.getElementById('quote-photo-3-status').textContent = 'Default: Ceremony Gallery Highlights';
     }
 
-   async function downloadLuxuryPdfProposal() {
-      if (quoteItems.length === 0) {
-        alert('Please add at least one line item to the quotation before generating the PDF.');
+    // -------------------------------------------------------------
+    // DYNAMIC DELIVERABLES & TERMS MANAGEMENT
+    // -------------------------------------------------------------
+    let quotationDeliverables = [];
+
+    const DEFAULT_TERMS = [
+      {
+        title: 'BOOKING & ADVANCE',
+        desc: 'A booking is confirmed only upon payment of 50% advance of the total package amount. The advance amount is non-refundable in case of cancellation.'
+      },
+      {
+        title: 'PAYMENT SCHEDULE',
+        desc: 'Payment shall be made in the following stages: 50% At the time of booking • 40% On/before the event day • 10% After deliverables are handed over. Payments can be made via cash, UPI, or bank transfer.'
+      },
+      {
+        title: 'CANCELLATION & RESCHEDULING',
+        desc: 'Cancellations must be informed at least 15 days prior to the event. Rescheduling is subject to our availability on the new date.'
+      },
+      {
+        title: 'DELIVERABLES',
+        desc: 'Edited photos & videos will be delivered within 45-60 working days after the event. Raw / unedited files are not provided unless agreed separately.'
+      },
+      {
+        title: 'COVERAGE',
+        desc: 'Coverage hours and team size are as per the selected package. Additional hours will be charged extra. Travel & accommodation for outstation events are to be borne by the client unless stated otherwise.'
+      },
+      {
+        title: 'USAGE RIGHTS',
+        desc: 'The studio reserves the right to use captured images/videos for portfolio, social media and promotional purposes, unless the client requests otherwise in writing.'
+      },
+      {
+        title: 'LIABILITY',
+        desc: 'The studio is not responsible for delays or losses due to circumstances beyond control such as technical faults, weather, or natural calamities.'
+      }
+    ];
+
+    let quotationTerms = [...DEFAULT_TERMS];
+
+    function renderDeliverablesTable() {
+      const tbody = document.getElementById('quote-deliverables-tbody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (quotationDeliverables.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="2" style="color:var(--text-muted); font-style:italic;">No custom deliverables added yet. Add items below to appear on the PDF.</td></tr>`;
         return;
       }
 
+      quotationDeliverables.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${item}</strong></td>
+          <td>
+            <button class="btn btn-danger" style="padding:4px 8px; font-size:0.7rem;" onclick="deleteDeliverableItem(${index})">✕</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function addDeliverableItem() {
+      const desc = document.getElementById('new-deliverable-desc').value.trim();
+      if (!desc) {
+        alert('Please enter a deliverable description.');
+        return;
+      }
+      quotationDeliverables.push(desc);
+      document.getElementById('new-deliverable-desc').value = '';
+      renderDeliverablesTable();
+    }
+
+    function deleteDeliverableItem(index) {
+      quotationDeliverables.splice(index, 1);
+      renderDeliverablesTable();
+    }
+
+    function renderTermsTable() {
+      const tbody = document.getElementById('quote-terms-tbody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      quotationTerms.forEach((t, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong style="color:var(--accent-gold); font-size:0.8rem;">${index + 1}. ${t.title}</strong></td>
+          <td style="color:var(--text-muted); font-size:0.8rem;">${t.desc}</td>
+          <td>
+            <button class="btn btn-danger" style="padding:4px 8px; font-size:0.7rem;" onclick="deleteTermItem(${index})">✕</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function addTermItem() {
+      const title = document.getElementById('new-term-title').value.trim();
+      const desc = document.getElementById('new-term-desc').value.trim();
+
+      if (!title || !desc) {
+        alert('Please enter both clause title and description.');
+        return;
+      }
+
+      quotationTerms.push({ title, desc });
+      document.getElementById('new-term-title').value = '';
+      document.getElementById('new-term-desc').value = '';
+      renderTermsTable();
+    }
+
+    function deleteTermItem(index) {
+      quotationTerms.splice(index, 1);
+      renderTermsTable();
+    }
+
+    function resetQuotationForm() {
+      document.getElementById('quote-client-name').value = '';
+      document.getElementById('quote-presented-by').value = 'TWS Studio';
+      document.getElementById('quote-event-dates').value = '';
+      document.getElementById('quote-city').value = '';
+      document.getElementById('quote-regular-price').value = '';
+      document.getElementById('quote-special-price').value = '';
+      document.getElementById('quote-savings-display').value = '₹0/-';
+      
+      quotationDeliverables = [];
+      quotationTerms = [...DEFAULT_TERMS];
+      clearProposalPhotos();
+
+      renderDeliverablesTable();
+      renderTermsTable();
+    }
+
+    function updatePricingDisplays() {
+      const reg = parseFloat(document.getElementById('quote-regular-price').value) || 0;
+      const spec = parseFloat(document.getElementById('quote-special-price').value) || 0;
+      const save = Math.max(0, reg - spec);
+      document.getElementById('quote-savings-display').value = save > 0 ? `₹${save.toLocaleString('en-IN')}/-` : '₹0/-';
+    }
+
+    // Helper: Cleanly crop and scale image to exact box dimensions (object-fit: cover)
+    async function cropImageCover(sourceUrlOrBase64, targetWidth, targetHeight) {
+      return new Promise((resolve) => {
+        if (!sourceUrlOrBase64) return resolve(null);
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = targetWidth * 2;
+          canvas.height = targetHeight * 2;
+          const ctx = canvas.getContext('2d');
+
+          const imgRatio = img.width / img.height;
+          const targetRatio = targetWidth / targetHeight;
+
+          let renderW, renderH, offsetX, offsetY;
+
+          if (imgRatio > targetRatio) {
+            renderH = img.height;
+            renderW = img.height * targetRatio;
+            offsetX = (img.width - renderW) / 2;
+            offsetY = 0;
+          } else {
+            renderW = img.width;
+            renderH = img.width / targetRatio;
+            offsetX = 0;
+            offsetY = (img.height - renderH) / 2;
+          }
+
+          ctx.drawImage(img, offsetX, offsetY, renderW, renderH, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL('image/jpeg', 0.90));
+        };
+        img.onerror = () => resolve(null);
+        img.src = sourceUrlOrBase64;
+      });
+    }
+
+    // Helper: Convert Image URL or Canvas to Base64
+    async function getBase64ImageFromUrl(imageUrl) {
+      return new Promise((resolve) => {
+        if (!imageUrl) return resolve(null);
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth || img.width;
+          canvas.height = img.naturalHeight || img.height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          resolve(canvas.toDataURL('image/jpeg', 0.90));
+        };
+        img.onerror = () => resolve(null);
+        img.src = imageUrl;
+      });
+    }
+
+    // -------------------------------------------------------------
+    // EXACT EDITORIAL BURGUNDY PROPOSAL PDF GENERATOR (CLIENT STYLE)
+    // -------------------------------------------------------------
+    async function downloadLuxuryPdfProposal() {
       const btn = document.getElementById('pdf-download-btn');
       if (btn) {
-        btn.textContent = '⏳ Rendering 3-Page PDF...';
+        btn.textContent = '⏳ Rendering 5-Page Proposal PDF...';
         btn.disabled = true;
       }
 
-      const clientName = document.getElementById('quote-client-name')?.value.trim() || 'Valued Client';
-      const quoteNum = document.getElementById('quote-number')?.value.trim() || 'TWS-' + Math.floor(100000 + Math.random() * 900000);
-      const dates = document.getElementById('quote-event-dates')?.value.trim() || 'Upcoming Celebration';
+      const clientName = document.getElementById('quote-client-name')?.value.trim() || 'Bride & Groom';
+      const presentedBy = document.getElementById('quote-presented-by')?.value.trim() || 'TWS Studio';
+      const dates = document.getElementById('quote-event-dates')?.value.trim() || 'Dec 2026';
       const city = document.getElementById('quote-city')?.value.trim() || 'Hyderabad, India';
-      const quoteDate = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+      const regularPrice = parseFloat(document.getElementById('quote-regular-price')?.value) || 310000;
+      const specialPrice = parseFloat(document.getElementById('quote-special-price')?.value) || 225000;
+      const savings = Math.max(0, regularPrice - specialPrice);
+
+      const studioPhone = localStorage.getItem('weddism_setting_phone') || '+91 76600 82214';
+      const studioEmail = localStorage.getItem('weddism_setting_email') || 'hello@theweddismstories.com';
+      const studioInsta = localStorage.getItem('weddism_setting_instagram') || '@theweddismstories';
+
+      const deliverablesToPrint = quotationDeliverables.length > 0 ? quotationDeliverables : [
+        '4 Cinematic Teasers (4K)',
+        '4 Full-Length Feature Films (4K Ultra HD)',
+        '1 Complimentary Reel Per Event and pre wedding photos',
+        'Complete high-resolution cloud gallery with QR guest sharing'
+      ];
+
+      // Retrieve fallback photos from website content if custom proposal photos are not set
+      let fallbackPhoto1 = customProposalPhotos.photo1 || document.getElementById('hero-preview')?.src;
+      let fallbackPhoto2 = customProposalPhotos.photo2 || document.getElementById('intro-preview')?.src;
+      let fallbackPhoto3 = customProposalPhotos.photo3;
+
+      if (!fallbackPhoto3) {
+        const haldiPhotos = JSON.parse(localStorage.getItem('weddism_cat_haldi') || '[]');
+        const marriagePhotos = JSON.parse(localStorage.getItem('weddism_cat_marriage') || '[]');
+        if (marriagePhotos.length > 0) fallbackPhoto3 = marriagePhotos[0];
+        else if (haldiPhotos.length > 0) fallbackPhoto3 = haldiPhotos[0];
+        else fallbackPhoto3 = fallbackPhoto2 || fallbackPhoto1;
+      }
+
+      // Exact PDF Collage Sizes (PT)
+      const totalW = 595.28 - 90; // Page width 505.28 pt
+      const leftImgW = Math.round(totalW * 0.58); // ~293 pt
+      const rightImgW = totalW - leftImgW - 10;   // ~202 pt
+      const totalH = 175;
+      const stackedH = Math.round((totalH - 8) / 2); // ~83 pt
+
+      // Crop all photos cleanly to avoid stretching
+      const [photo1Base64, photo2Base64, photo3Base64] = await Promise.all([
+        cropImageCover(fallbackPhoto1, leftImgW, totalH),
+        cropImageCover(fallbackPhoto2, rightImgW, stackedH),
+        cropImageCover(fallbackPhoto3, rightImgW, stackedH)
+      ]);
 
       try {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({
           orientation: 'portrait',
-          unit: 'mm',
+          unit: 'pt',
           format: 'a4'
         });
 
-        // Luxury Brand Palette
-        const NAVY_DARK   = [18, 26, 38];     // #121a26 Deep Royal Navy
-        const GOLD_ACCENT = [197, 160, 89];   // #c5a059 Champagne Gold
-        const CHARCOAL    = [45, 45, 45];     // #2d2d2d Text
-        const LIGHT_CREAM = [248, 246, 240];  // #f8f6f0 Luxury Tint Background
-        const WHITE       = [255, 255, 255];
-        const MUTED_GRAY  = [120, 120, 120];
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
 
-        // Applies full background color, top header, and bottom footer to every page
-        function applyPageBase(pageNum, totalPages) {
-          // 1. Full Page Background Tint
-          doc.setFillColor(...LIGHT_CREAM);
-          doc.rect(0, 0, 210, 297, 'F');
+        // Exact Brand Colors
+        const MAROON_DARK   = [82, 18, 26];     // #52121A Deep Editorial Maroon for Cover
+        const MAROON_HEADER = [114, 28, 36];    // #721C24
+        const BG_WARM_CREAM = [250, 246, 240];  // #FAF6F0
+        const GOLD_ACCENT   = [197, 168, 128];  // #C5A880
+        const INK_DARK      = [40, 36, 33];     // #282421
+        const MUTED_GRAY    = [135, 125, 120];  // #877D78
+        const WHITE         = [255, 255, 255];
+        const PILL_BG       = [255, 255, 255];
+        const PILL_BORDER   = [226, 218, 208];
 
-          // 2. Luxury Header Banner
-          doc.setFillColor(...NAVY_DARK);
-          doc.rect(0, 0, 210, 36, 'F');
+        function applyPageHeaderAndFooter(pageNumStr) {
+          doc.setFillColor(...BG_WARM_CREAM);
+          doc.rect(0, 0, pageWidth, pageHeight, 'F');
 
-          // Gold Accent Ribbon
-          doc.setFillColor(...GOLD_ACCENT);
-          doc.rect(0, 36, 210, 1.5, 'F');
+          // Subtle Gold Outer Border
+          doc.setDrawColor(...GOLD_ACCENT);
+          doc.setLineWidth(0.6);
+          doc.rect(25, 25, pageWidth - 50, pageHeight - 50);
 
-          // Studio Branding
-          doc.setFont('times', 'bold');
-          doc.setFontSize(18);
-          doc.setTextColor(...WHITE);
-          doc.text('THE WEDDISM STORIES', 16, 18);
-
-          doc.setFont('helvetica', 'normal');
-          doc.setFontSize(8);
-          doc.setTextColor(...GOLD_ACCENT);
-          doc.text('LUXURY WEDDING CINEMATOGRAPHY & PHOTOGRAPHY', 16, 25);
-
-          doc.setFontSize(7.5);
-          doc.setTextColor(200, 200, 200);
-          doc.text('Hyderabad, India • theweddismstories.com', 16, 31);
-
-          // Quote Ref & Date
-          doc.setFont('helvetica', 'bold');
+          doc.setFont('times', 'normal');
           doc.setFontSize(8.5);
-          doc.setTextColor(...GOLD_ACCENT);
-          doc.text(`REF: ${quoteNum}`, 194, 20, { align: 'right' });
-          doc.setFont('helvetica', 'normal');
-          doc.setFontSize(7.5);
-          doc.setTextColor(220, 220, 220);
-          doc.text(`Date: ${quoteDate}`, 194, 28, { align: 'right' });
-
-          // 3. Branded Footer
-          doc.setFillColor(...NAVY_DARK);
-          doc.rect(0, 285, 210, 12, 'F');
-          doc.setFillColor(...GOLD_ACCENT);
-          doc.rect(0, 284.5, 210, 0.5, 'F');
-
-          doc.setFont('times', 'italic');
-          doc.setFontSize(8);
-          doc.setTextColor(...GOLD_ACCENT);
-          doc.text('The Weddism Stories — Crafting Timeless Visual Heirlooms', 16, 292);
+          doc.setTextColor(...MUTED_GRAY);
+          doc.text('THE WEDDISM STORIES', pageWidth / 2, pageHeight - 34, { align: 'center' });
 
           doc.setFont('helvetica', 'normal');
-          doc.setFontSize(7.5);
-          doc.setTextColor(...WHITE);
-          doc.text(`Page ${pageNum} of ${totalPages}`, 194, 292, { align: 'right' });
+          doc.setFontSize(8.5);
+          doc.text(pageNumStr, pageWidth - 45, pageHeight - 34, { align: 'right' });
         }
 
-        // ==========================================
-        // PAGE 1: OVERVIEW & CLIENT DETAILS
-        // ==========================================
-        applyPageBase(1, 3);
+        // =========================================================
+        // PAGE 1: FULL MAROON LUXURY COVER (AS IN CLIENT SCREENSHOT)
+        // =========================================================
+        doc.setFillColor(...MAROON_DARK);
+        doc.rect(0, 0, pageWidth, pageHeight, 'F');
 
-        doc.setFont('times', 'bold');
-        doc.setFontSize(22);
-        doc.setTextColor(...NAVY_DARK);
-        doc.text('COMMISSION & QUOTATION', 16, 52);
+        // Fine Gold Outer Frame
+        doc.setDrawColor(...GOLD_ACCENT);
+        doc.setLineWidth(0.7);
+        doc.rect(25, 25, pageWidth - 50, pageHeight - 50);
 
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(9);
-        doc.setTextColor(...MUTED_GRAY);
-        doc.text('A customized photography and cinematography proposal crafted for your celebrations.', 16, 58);
-
-        // Client Info Card
-        doc.setFillColor(...WHITE);
-        doc.roundedRect(16, 66, 178, 48, 3, 3, 'F');
-        doc.setDrawColor(225, 220, 210);
-        doc.roundedRect(16, 66, 178, 48, 3, 3, 'S');
-
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(8.5);
-        doc.setTextColor(...GOLD_ACCENT);
-        doc.text('PREPARED FOR', 24, 76);
-
-        doc.setFont('times', 'bold');
-        doc.setFontSize(16);
-        doc.setTextColor(...NAVY_DARK);
-        doc.text(clientName, 24, 85);
-
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(9);
-        doc.setTextColor(...CHARCOAL);
-        doc.text(`Dates: ${dates}`, 24, 94);
-        doc.text(`Location: ${city}`, 24, 102);
-
-        // Package Summary Card
-        doc.setFillColor(...WHITE);
-        doc.roundedRect(16, 122, 178, 44, 3, 3, 'F');
-        doc.setDrawColor(225, 220, 210);
-        doc.roundedRect(16, 122, 178, 44, 3, 3, 'S');
-
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(8.5);
-        doc.setTextColor(...GOLD_ACCENT);
-        doc.text('PROPOSED PRODUCTION SUITE', 24, 132);
-
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(13);
-        doc.setTextColor(...NAVY_DARK);
-        doc.text('Royal Wedding Cinematography & Photography', 24, 142);
-
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(9);
-        doc.setTextColor(...CHARCOAL);
-        doc.text('Multi-crew candid captures, 4K wedding films, color grading, and cloud gallery delivery.', 24, 151);
-
-        // Artistic Statement Card
-        doc.setFillColor(...NAVY_DARK);
-        doc.roundedRect(16, 174, 178, 70, 3, 3, 'F');
-
-        doc.setFont('times', 'bold');
-        doc.setFontSize(13);
-        doc.setTextColor(...GOLD_ACCENT);
-        doc.text('OUR ARTISTIC COMMITMENT', 24, 187);
-
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(8.5);
-        doc.setTextColor(230, 230, 230);
-        const p1 = 'At The Weddism Stories, we document celebrations with a cinematic, fine-art editorial perspective. Every frame captures candid emotions, authentic rituals, and timeless aesthetic composition.';
-        const p2 = 'Our complete post-production workflow includes dedicated master color grading, audio synchronization, social teasers, and high-resolution cloud delivery for family and guests.';
-        doc.text(doc.splitTextToSize(p1, 162), 24, 196);
-        doc.text(doc.splitTextToSize(p2, 162), 24, 216);
-
-        // ==========================================
-        // PAGE 2: ITEMIZED DELIVERABLES & PRICING
-        // ==========================================
-        doc.addPage();
-        applyPageBase(2, 3);
-
-        doc.setFont('times', 'bold');
-        doc.setFontSize(18);
-        doc.setTextColor(...NAVY_DARK);
-        doc.text('DELIVERABLES & INVESTMENT BREAKDOWN', 16, 50);
-
-        // Extract items from your quoteItems array
-        let subtotal = 0;
-        const tableRows = quoteItems.map((it, idx) => {
-          subtotal += it.total;
-          return [
-            String(idx + 1).padStart(2, '0'),
-            it.desc,
-            String(it.qty),
-            `₹ ${it.rate.toLocaleString('en-IN')}`,
-            `₹ ${it.total.toLocaleString('en-IN')}`
-          ];
-        });
-
-        const tax = includeGst ? subtotal * 0.18 : 0;
-        const grandTotal = subtotal + tax;
-
-        // AutoTable for Billing
-        doc.autoTable({
-          startY: 58,
-          head: [['#', 'DELIVERABLE DESCRIPTION', 'QTY', 'RATE', 'TOTAL (INR)']],
-          body: tableRows,
-          theme: 'plain',
-          headStyles: {
-            fillColor: NAVY_DARK,
-            textColor: WHITE,
-            font: 'helvetica',
-            fontStyle: 'bold',
-            fontSize: 8,
-            cellPadding: 4.5
-          },
-          bodyStyles: {
-            textColor: CHARCOAL,
-            fontSize: 8,
-            cellPadding: 4.5,
-            lineColor: [225, 220, 210],
-            lineWidth: 0.3
-          },
-          columnStyles: {
-            0: { cellWidth: 10, halign: 'center', textColor: MUTED_GRAY },
-            1: { cellWidth: 'auto' },
-            2: { cellWidth: 14, halign: 'center' },
-            3: { cellWidth: 28, halign: 'right' },
-            4: { cellWidth: 32, halign: 'right', fontStyle: 'bold', textColor: NAVY_DARK }
-          },
-          alternateRowStyles: {
-            fillColor: WHITE
-          },
-          margin: { left: 16, right: 16 }
-        });
-
-        // Totals Box
-        const tableBottomY = doc.lastAutoTable.finalY + 6;
-        doc.setFillColor(...WHITE);
-        doc.roundedRect(104, tableBottomY, 90, includeGst ? 28 : 18, 2, 2, 'F');
-        doc.setDrawColor(225, 220, 210);
-        doc.roundedRect(104, tableBottomY, 90, includeGst ? 28 : 18, 2, 2, 'S');
-
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(8);
-        doc.setTextColor(...CHARCOAL);
-        doc.text('Subtotal:', 110, tableBottomY + 7);
-        doc.text(`₹ ${subtotal.toLocaleString('en-IN')}`, 188, tableBottomY + 7, { align: 'right' });
-
-        if (includeGst) {
-          doc.text('GST (18%):', 110, tableBottomY + 14);
-          doc.text(`₹ ${tax.toLocaleString('en-IN')}`, 188, tableBottomY + 14, { align: 'right' });
-        }
-
-        doc.setFillColor(...NAVY_DARK);
-        const barY = includeGst ? tableBottomY + 18 : tableBottomY + 9;
-        doc.roundedRect(104, barY, 90, 10, 1.5, 1.5, 'F');
-
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(8.5);
-        doc.setTextColor(...GOLD_ACCENT);
-        doc.text('GRAND TOTAL:', 110, barY + 6.5);
-
+        // Top Logo Monogram
+        doc.setFont('times', 'italic');
+        doc.setFontSize(38);
         doc.setTextColor(...WHITE);
-        doc.text(`₹ ${grandTotal.toLocaleString('en-IN')}`, 188, barY + 6.5, { align: 'right' });
+        doc.text('TWS', pageWidth / 2, 170, { align: 'center' });
 
-        // Delivery Notes Card
-        const notesY = barY + 18;
-        doc.setFillColor(...WHITE);
-        doc.roundedRect(16, notesY, 178, 36, 2, 2, 'F');
-        doc.setDrawColor(225, 220, 210);
-        doc.roundedRect(16, notesY, 178, 36, 2, 2, 'S');
+        doc.setFont('times', 'normal');
+        doc.setFontSize(16);
+        doc.setTextColor(...WHITE);
+        doc.text('The   Weddism   Stories', pageWidth / 2, 196, { align: 'center' });
 
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(8);
-        doc.setTextColor(...GOLD_ACCENT);
-        doc.text('DELIVERY SCHEDULE', 22, notesY + 9);
-
-        doc.setFont('helvetica', 'normal');
         doc.setFontSize(7.5);
-        doc.setTextColor(...CHARCOAL);
-        doc.text('• Social Media Teaser delivered within 7 to 10 working days.', 22, notesY + 16);
-        doc.text('• Full-Resolution Edited Photos delivered via Cloud QR within 3 weeks.', 22, notesY + 23);
-        doc.text('• Complete 4K Cinematic Wedding Film delivered in 4 to 6 weeks.', 22, notesY + 30);
+        doc.setTextColor(...GOLD_ACCENT);
+        doc.text('C A P T U R I N G     F O R E V E R', pageWidth / 2, 216, { align: 'center' });
 
-        // ==========================================
-        // PAGE 3: TERMS, BANKING & SIGNATURES
-        // ==========================================
+        // Center Title Block
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7.5);
+        doc.setTextColor(...GOLD_ACCENT);
+        doc.text('W E D D I N G   P H O T O G R A P H Y', pageWidth / 2, 480, { align: 'center' });
+
+        doc.setFont('times', 'italic');
+        doc.setFontSize(24);
+        doc.setTextColor(...WHITE);
+        doc.text('Proposal & Quotation', pageWidth / 2, 508, { align: 'center' });
+
+        // Gold Diamond Divider
+        doc.setFillColor(...GOLD_ACCENT);
+        doc.rect((pageWidth / 2) - 30, 522, 25, 0.8, 'F');
+        doc.rect((pageWidth / 2) + 5, 522, 25, 0.8, 'F');
+        doc.text('•', pageWidth / 2, 524, { align: 'center' });
+
+        // Metadata 2-Column: PREPARED FOR & PRESENTED BY
+        const colLeftX = pageWidth / 2 - 100;
+        const colRightX = pageWidth / 2 + 100;
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7.5);
+        doc.setTextColor(...GOLD_ACCENT);
+        doc.text('PREPARED FOR', colLeftX, 558, { align: 'center' });
+        doc.text('PRESENTED BY', colRightX, 558, { align: 'center' });
+
+        doc.setFont('times', 'normal');
+        doc.setFontSize(13);
+        doc.setTextColor(...WHITE);
+        doc.text(clientName, colLeftX, 576, { align: 'center' });
+        doc.text(presentedBy, colRightX, 576, { align: 'center' });
+
+
+        // =========================================================
+        // PAGE 2: ABOUT US (3 PHOTO EDITORIAL COLLAGE)
+        // =========================================================
         doc.addPage();
-        applyPageBase(3, 3);
+        applyPageHeaderAndFooter('02');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7.5);
+        doc.setTextColor(...GOLD_ACCENT);
+        doc.text('W H O   W E   A R E', pageWidth / 2, 60, { align: 'center' });
 
         doc.setFont('times', 'bold');
-        doc.setFontSize(18);
-        doc.setTextColor(...NAVY_DARK);
-        doc.text('TERMS OF ENGAGEMENT & ACCEPTANCE', 16, 50);
+        doc.setFontSize(24);
+        doc.setTextColor(...MAROON_HEADER);
+        doc.text('About Us', pageWidth / 2, 84, { align: 'center' });
 
-        // Terms Box
-        doc.setFillColor(...WHITE);
-        doc.roundedRect(16, 58, 178, 74, 2, 2, 'F');
-        doc.setDrawColor(225, 220, 210);
-        doc.roundedRect(16, 58, 178, 74, 2, 2, 'S');
-
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(8.5);
-        doc.setTextColor(...GOLD_ACCENT);
-        doc.text('BOOKING POLICIES', 22, 68);
-
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(8);
-        doc.setTextColor(...CHARCOAL);
-        const terms = [
-          '1. Booking Confirmation: 50% advance deposit is required to reserve the dates.',
-          '2. Balance Payment: Remaining 50% is due upon completion of the shoot.',
-          '3. Travel & Logistics: Outstation logistics are coordinated directly with the client.',
-          '4. Storage: High-resolution masters are archived securely in cloud storage for 12 months.',
-          '5. Raw Files: Full-resolution raw video footage is available upon request.'
-        ];
-        let termY = 76;
-        terms.forEach(t => {
-          doc.text(t, 22, termY);
-          termY += 9;
-        });
-
-        // Banking Info Box
-        doc.setFillColor(...WHITE);
-        doc.roundedRect(16, 140, 178, 42, 2, 2, 'F');
-        doc.setDrawColor(225, 220, 210);
-        doc.roundedRect(16, 140, 178, 42, 2, 2, 'S');
-
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(8.5);
-        doc.setTextColor(...GOLD_ACCENT);
-        doc.text('PAYMENT DETAILS', 22, 150);
-
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(8);
-        doc.setTextColor(...CHARCOAL);
-        doc.text('Account Name: The Weddism Stories', 22, 158);
-        doc.text('Bank: HDFC Bank | Branch: Banjara Hills, Hyderabad', 22, 165);
-        doc.text('UPI ID: theweddismstories@hdfcbank', 22, 172);
-
-        // Signatures Box
-        doc.setFillColor(...WHITE);
-        doc.roundedRect(16, 190, 178, 64, 2, 2, 'F');
-        doc.setDrawColor(225, 220, 210);
-        doc.roundedRect(16, 190, 178, 64, 2, 2, 'S');
-
-        // Client Signature
-        doc.setDrawColor(...MUTED_GRAY);
-        doc.line(26, 230, 86, 230);
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(7.5);
-        doc.setTextColor(...NAVY_DARK);
-        doc.text('CLIENT ACCEPTANCE SIGNATURE', 26, 236);
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(7.5);
+        doc.setFont('times', 'italic');
+        doc.setFontSize(11);
         doc.setTextColor(...MUTED_GRAY);
-        doc.text(clientName, 26, 242);
+        doc.text('Storytellers of love, light, rituals & legacy', pageWidth / 2, 100, { align: 'center' });
 
-        // Studio Signature
+        // Editorial Photo Grid matching Client Screenshot
+        const photoGridX = 45;
+        const photoGridY = 120;
+        const rightX = photoGridX + leftImgW + 10;
+
+        // 1. Left Large Photo
+        if (photo1Base64) {
+          try {
+            doc.addImage(photo1Base64, 'JPEG', photoGridX, photoGridY, leftImgW, totalH, undefined, 'FAST');
+          } catch(e) {
+            doc.setFillColor(70, 60, 56);
+            doc.rect(photoGridX, photoGridY, leftImgW, totalH, 'F');
+          }
+        } else {
+          doc.setFillColor(70, 60, 56);
+          doc.rect(photoGridX, photoGridY, leftImgW, totalH, 'F');
+        }
+
+        // 2. Right Top Photo
+        if (photo2Base64) {
+          try {
+            doc.addImage(photo2Base64, 'JPEG', rightX, photoGridY, rightImgW, stackedH, undefined, 'FAST');
+          } catch(e) {
+            doc.setFillColor(110, 85, 80);
+            doc.rect(rightX, photoGridY, rightImgW, stackedH, 'F');
+          }
+        } else {
+          doc.setFillColor(110, 85, 80);
+          doc.rect(rightX, photoGridY, rightImgW, stackedH, 'F');
+        }
+
+        // 3. Right Bottom Photo
+        if (photo3Base64) {
+          try {
+            doc.addImage(photo3Base64, 'JPEG', rightX, photoGridY + stackedH + 8, rightImgW, stackedH, undefined, 'FAST');
+          } catch(e) {
+            doc.setFillColor(145, 125, 120);
+            doc.rect(rightX, photoGridY + stackedH + 8, rightImgW, stackedH, 'F');
+          }
+        } else {
+          doc.setFillColor(145, 125, 120);
+          doc.rect(rightX, photoGridY + stackedH + 8, rightImgW, stackedH, 'F');
+        }
+
+        // Cultural Quote Section
+        doc.setFont('times', 'italic');
+        doc.setFontSize(11);
+        doc.setTextColor(...MAROON_HEADER);
+        const quoteText = '"From jeelakarra bellam to mangalsutra, we preserve every sacred detail\nwith elegance, emotion and artistry."';
+        doc.text(quoteText, pageWidth / 2, 328, { align: 'center', lineHeightFactor: 1.4 });
+
+        // Diamond Icon below quote
+        doc.setFillColor(...GOLD_ACCENT);
+        doc.rect((pageWidth / 2) - 20, 355, 16, 0.8, 'F');
+        doc.rect((pageWidth / 2) + 4, 355, 16, 0.8, 'F');
+        doc.text('•', pageWidth / 2, 357, { align: 'center' });
+
+        // Telugu Traditions Ribbon Pill
+        doc.setFillColor(...MAROON_HEADER);
+        doc.roundedRect(45, 375, pageWidth - 90, 24, 3, 3, 'F');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7);
+        doc.setTextColor(...WHITE);
+        doc.text('TEMPLE TONES   TELUGU TRADITIONS   FAMILY EMOTIONS   FESTIVE RITUALS   CINEMATIC STORYTELLING', pageWidth / 2, 390, { align: 'center' });
+
+        // Two Column Story Cards
+        const cW = (pageWidth - 90 - 20) / 2;
+
+        // Left Card
+        doc.setFillColor(...WHITE);
         doc.setDrawColor(...GOLD_ACCENT);
         doc.setLineWidth(0.6);
-        doc.line(124, 230, 184, 230);
-        doc.setFont('times', 'bold');
+        doc.roundedRect(45, 415, cW, 110, 3, 3, 'FD');
+
+        doc.setFont('helvetica', 'bold');
         doc.setFontSize(8.5);
-        doc.setTextColor(...NAVY_DARK);
-        doc.text('FOR THE WEDDISM STORIES', 124, 236);
-        doc.setFont('times', 'italic');
+        doc.setTextColor(...MAROON_HEADER);
+        doc.text('TRADITION-FIRST STORYTELLING', 56, 436);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(...INK_DARK);
+        const p2Col1 = 'We thoughtfully document Telugu wedding customs with cultural sensitivity, aesthetic detail and emotional depth.';
+        doc.text(doc.splitTextToSize(p2Col1, cW - 22), 56, 452, { lineHeightFactor: 1.4 });
+
+        // Right Card
+        doc.setFillColor(...WHITE);
+        doc.setDrawColor(...GOLD_ACCENT);
+        doc.roundedRect(45 + cW + 20, 415, cW, 110, 3, 3, 'FD');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8.5);
+        doc.setTextColor(...MAROON_HEADER);
+        doc.text('CINEMATIC & CANDID', 56 + cW + 20, 436);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(...INK_DARK);
+        const p2Col2 = 'From intimate blessings to grand mandap moments, every frame is crafted to feel timeless, refined and personal.';
+        doc.text(doc.splitTextToSize(p2Col2, cW - 22), 56 + cW + 20, 452, { lineHeightFactor: 1.4 });
+
+
+        // =========================================================
+        // PAGE 3: WHAT WE COVER (EVENT COVERAGE)
+        // =========================================================
+        doc.addPage();
+        applyPageHeaderAndFooter('03');
+
+        doc.setFont('helvetica', 'bold');
         doc.setFontSize(7.5);
         doc.setTextColor(...GOLD_ACCENT);
-        doc.text('Authorized Signatory', 124, 242);
+        doc.text('W H A T   W E   C O V E R', pageWidth / 2, 58, { align: 'center' });
 
-        // Save the PDF
+        doc.setFont('times', 'bold');
+        doc.setFontSize(24);
+        doc.setTextColor(...MAROON_HEADER);
+        doc.text('Event Coverage', pageWidth / 2, 82, { align: 'center' });
+
+        doc.setFont('times', 'italic');
+        doc.setFontSize(11);
+        doc.setTextColor(...MUTED_GRAY);
+        doc.text('Every ritual, every emotion, beautifully documented', pageWidth / 2, 98, { align: 'center' });
+
+        const eventRows = [
+          { num: '01', title: 'ENGAGEMENT', tags: ['Traditional Photography', 'Traditional Videography', 'Candid Photography', 'Cinematic Videography'] },
+          { num: '02', title: 'HALDI', tags: ['Traditional Photography', 'Traditional Videography', 'Candid Photography', 'Cinematic Videography'] },
+          { num: '03', title: 'SANGEETH', tags: ['Traditional Photography', 'Traditional Videography', 'Candid Photography', 'Cinematic Videography'] },
+          { num: '04', title: 'BONALU', tags: ['Traditional Photography'] },
+          { num: '05', title: 'PELLIKUTHURU', tags: ['Traditional Photography'] },
+          { num: '06', title: 'MEHENDI', tags: ['Candid Photography'] },
+          { num: '07', title: 'WEDDING', tags: ['Traditional Photography', 'Traditional Videography', 'Candid Photography', 'Cinematic Videography', 'Drone Coverage', 'LED 8/12'] }
+        ];
+
+        let currY = 115;
+        const boxWidth = pageWidth - 90;
+
+        eventRows.forEach(ev => {
+          doc.setFillColor(...MAROON_HEADER);
+          doc.roundedRect(45, currY, boxWidth, 22, 2, 2, 'F');
+
+          doc.setFont('times', 'bold');
+          doc.setFontSize(8.5);
+          doc.setTextColor(...WHITE);
+          doc.text(`${ev.num}   ${ev.title}`, 58, currY + 15);
+
+          currY += 26;
+
+          let bx = 45;
+          ev.tags.forEach(tg => {
+            const isHighlighted = (tg === 'LED 8/12');
+            const textW = doc.getTextWidth(tg);
+            const badgeW = textW + 22;
+
+            if (bx + badgeW > 45 + boxWidth) {
+              bx = 45;
+              currY += 26;
+            }
+
+            if (isHighlighted) {
+              doc.setFillColor(...MAROON_HEADER);
+              doc.setDrawColor(...MAROON_HEADER);
+              doc.roundedRect(bx, currY, badgeW, 20, 10, 10, 'FD');
+              doc.setTextColor(...WHITE);
+            } else {
+              doc.setFillColor(...PILL_BG);
+              doc.setDrawColor(...PILL_BORDER);
+              doc.setLineWidth(0.6);
+              doc.roundedRect(bx, currY, badgeW, 20, 10, 10, 'FD');
+              doc.setTextColor(...INK_DARK);
+            }
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(7.5);
+            doc.text(tg, bx + (badgeW / 2), currY + 13, { align: 'center' });
+
+            bx += badgeW + 8;
+          });
+
+          currY += 32;
+        });
+
+
+        // =========================================================
+        // PAGE 4: YOUR INVESTMENT (DELIVERABLES & PRICING)
+        // =========================================================
+        doc.addPage();
+        applyPageHeaderAndFooter('04');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7.5);
+        doc.setTextColor(...GOLD_ACCENT);
+        doc.text('Y O U R   I N V E S T M E N T', pageWidth / 2, 60, { align: 'center' });
+
+        doc.setFont('times', 'bold');
+        doc.setFontSize(24);
+        doc.setTextColor(...MAROON_HEADER);
+        doc.text('Deliverables & Pricing', pageWidth / 2, 85, { align: 'center' });
+
+        doc.setFont('times', 'italic');
+        doc.setFontSize(11);
+        doc.setTextColor(...MUTED_GRAY);
+        doc.text('Crafted packages, transparent value', pageWidth / 2, 102, { align: 'center' });
+
+        // Complimentary Banner Box
+        doc.setFillColor(...WHITE);
+        doc.setDrawColor(...GOLD_ACCENT);
+        doc.setLineWidth(0.7);
+        doc.roundedRect(45, 130, pageWidth - 90, 75, 3, 3, 'FD');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8.5);
+        doc.setTextColor(...MAROON_HEADER);
+        doc.text('COMPLIMENTARY', 65, 156);
+
+        doc.setFont('times', 'bold');
+        doc.setFontSize(13);
+        doc.setTextColor(...INK_DARK);
+        doc.text('One Reel Per Event', 65, 174);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(...MUTED_GRAY);
+        doc.text('A trendy, share-ready social reel for every event on us, absolutely free.', 65, 190);
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.setTextColor(...MAROON_HEADER);
+        doc.text('• Few edited Pictures per event', pageWidth - 65, 174, { align: 'right' });
+
+        // What You Receive (Dynamic Items)
+        doc.setFont('times', 'bold');
+        doc.setFontSize(18);
+        doc.setTextColor(...MAROON_HEADER);
+        doc.text('What You Receive', pageWidth / 2, 240, { align: 'center' });
+
+        let rY = 268;
+        deliverablesToPrint.forEach(item => {
+          doc.setFillColor(...MAROON_HEADER);
+          doc.circle(75, rY - 4, 3, 'F');
+
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(9);
+          doc.setTextColor(...INK_DARK);
+          doc.text(item, 88, rY);
+          rY += 22;
+        });
+
+        // Pricing Dual Block Box
+        const pBlockY = Math.max(rY + 18, 380);
+        doc.setFillColor(...MAROON_HEADER);
+        doc.roundedRect(45, pBlockY, pageWidth - 90, 130, 4, 4, 'F');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.setTextColor(...GOLD_ACCENT);
+        doc.text(`SAVE Rs. ${savings.toLocaleString('en-IN')}/-`, pageWidth / 2, pBlockY + 26, { align: 'center' });
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10.5);
+        doc.setTextColor(...WHITE);
+        doc.text('REGULAR PRICE', pageWidth / 2, pBlockY + 48, { align: 'center' });
+
+        doc.setFont('times', 'normal');
+        doc.setFontSize(15);
+        doc.setTextColor(...WHITE);
+        doc.text(`Rs. ${regularPrice.toLocaleString('en-IN')}/-`, pageWidth / 2, pBlockY + 66, { align: 'center' });
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(...GOLD_ACCENT);
+        doc.text('SPECIAL OFFER', pageWidth / 2, pBlockY + 92, { align: 'center' });
+
+        doc.setFont('times', 'bold');
+        doc.setFontSize(20);
+        doc.setTextColor(...WHITE);
+        doc.text(`Rs. ${specialPrice.toLocaleString('en-IN')}/-`, pageWidth / 2, pBlockY + 114, { align: 'center' });
+
+        doc.setFont('times', 'italic');
+        doc.setFontSize(11);
+        doc.setTextColor(...MAROON_HEADER);
+        doc.text('"An investment in memories you will treasure for a lifetime."', pageWidth / 2, pBlockY + 155, { align: 'center' });
+
+
+        // =========================================================
+        // PAGE 5: THE FINE PRINT (TERMS & CONDITIONS)
+        // =========================================================
+        doc.addPage();
+        applyPageHeaderAndFooter('05');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7.5);
+        doc.setTextColor(...GOLD_ACCENT);
+        doc.text('T H E   F I N E   P R I N T', pageWidth / 2, 58, { align: 'center' });
+
+        doc.setFont('times', 'bold');
+        doc.setFontSize(24);
+        doc.setTextColor(...MAROON_HEADER);
+        doc.text('Terms & Conditions', pageWidth / 2, 82, { align: 'center' });
+
+        doc.setFont('times', 'italic');
+        doc.setFontSize(11);
+        doc.setTextColor(...MUTED_GRAY);
+        doc.text('Simple, clear & fair', pageWidth / 2, 98, { align: 'center' });
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.setTextColor(...MAROON_HEADER);
+        doc.text('PLEASE READ CAREFULLY', 45, 122);
+
+        let tY = 138;
+        quotationTerms.forEach((t, idx) => {
+          doc.setFillColor(...MAROON_HEADER);
+          doc.roundedRect(45, tY, 14, 14, 2, 2, 'F');
+
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(7.5);
+          doc.setTextColor(...WHITE);
+          doc.text(String(idx + 1), 52, tY + 10, { align: 'center' });
+
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(8.5);
+          doc.setTextColor(...MAROON_HEADER);
+          doc.text(t.title, 66, tY + 10);
+
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(7.8);
+          doc.setTextColor(...INK_DARK);
+          const splitDesc = doc.splitTextToSize(t.desc, pageWidth - 115);
+          doc.text(splitDesc, 66, tY + 22, { lineHeightFactor: 1.35 });
+
+          tY += (splitDesc.length * 10) + 24;
+        });
+
+        // Thank You & Contact Closing Footer Box
+        const tyBoxY = pageHeight - 120;
+        doc.setFont('times', 'bold');
+        doc.setFontSize(16);
+        doc.setTextColor(...MAROON_HEADER);
+        doc.text('Thank You', 45, tyBoxY);
+
+        doc.setFont('times', 'italic');
+        doc.setFontSize(11);
+        doc.setTextColor(...INK_DARK);
+        doc.text('With Love,', 45, tyBoxY + 16);
+        doc.text('The Weddism Stories', 45, tyBoxY + 30);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+        doc.setTextColor(...MUTED_GRAY);
+        doc.text(studioPhone, pageWidth - 45, tyBoxY, { align: 'right' });
+        doc.text(studioInsta, pageWidth - 45, tyBoxY + 14, { align: 'right' });
+        doc.text(studioEmail, pageWidth - 45, tyBoxY + 28, { align: 'right' });
+
         const fileName = `${clientName.replace(/[^a-zA-Z0-9]/g, '_')}_Wedding_Proposal.pdf`;
         doc.save(fileName);
 
@@ -1052,7 +1312,7 @@
         alert("PDF error: " + err.message);
       } finally {
         if (btn) {
-          btn.textContent = '📥 Download PDF Proposal';
+          btn.textContent = '📥 Download Exact 5-Page Proposal PDF';
           btn.disabled = false;
         }
       }
@@ -1063,10 +1323,10 @@
     // -------------------------------------------------------------
     function loadBusinessSettings() {
       document.getElementById('setting-whatsapp').value = localStorage.getItem('weddism_setting_whatsapp') || '';
-      document.getElementById('setting-phone').value = localStorage.getItem('weddism_setting_phone') || '';
-      document.getElementById('setting-email').value = localStorage.getItem('weddism_setting_email') || '';
+      document.getElementById('setting-phone').value = localStorage.getItem('weddism_setting_phone') || '+91 76600 82214';
+      document.getElementById('setting-email').value = localStorage.getItem('weddism_setting_email') || 'hello@theweddismstories.com';
       document.getElementById('setting-location').value = localStorage.getItem('weddism_setting_location') || '';
-      document.getElementById('setting-instagram').value = localStorage.getItem('weddism_setting_instagram') || '';
+      document.getElementById('setting-instagram').value = localStorage.getItem('weddism_setting_instagram') || '@theweddismstories';
       document.getElementById('setting-youtube').value = localStorage.getItem('weddism_setting_youtube') || '';
       document.getElementById('setting-facebook').value = localStorage.getItem('weddism_setting_facebook') || '';
     }
@@ -1093,7 +1353,8 @@
 
     async function initSiteContent() {
       loadBusinessSettings();
-      renderQuotes();
+      renderDeliverablesTable();
+      renderTermsTable();
 
       if (supabaseClient) {
         const { data: heroData } = await supabaseClient.from('site_singles').select('value').eq('key', 'hero_img').single();
