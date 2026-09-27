@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bespoke Booking Configurator | The Weddism Stories</title>
+  <!-- Load the existing styles directly from your index file setup -->
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      background: #111;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: inherit;
+    }
+    /* Force the modal panel to display as a standalone centered card */
+    .modal, #bookingModal, .configurator-modal, [data-modal] {
+      display: block !important;
+      position: relative !important;
+      width: 100% !important;
+      max-width: 900px !important;
+      background: #ffffff !important;
+      border-radius: 8px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      margin: auto;
+      z-index: 1;
+    }
+    /* Hide background backdrop and modal close cross */
+    .modal-backdrop, .overlay, .close-btn, [data-close-modal] {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Injected inquiry panel wrapper -->
+  <div id="inquiryMount"></div>
+
+  <script>
+    // Fetch the booking configurator HTML from index.html automatically
+    fetch('index.html')
+      .then(res => res.text())
+      .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        // Locate the configurator modal element
+        const modal = doc.querySelector('.modal, #bookingModal, [data-modal]') || 
+                      doc.querySelector('.configurator-modal');
+        
+        if (modal) {
+          document.getElementById('inquiryMount').appendChild(modal);
+          // Execute scripts so step selection and pricing logic function normally
+          const scripts = doc.querySelectorAll('script');
+          scripts.forEach(s => {
+            if (!s.src && s.textContent.includes('Configurator') || s.textContent.includes('booking')) {
+              const runScript = document.createElement('script');
+              runScript.textContent = s.textContent;
+              document.body.appendChild(runScript);
+            }
+          });
+        }
+      });
+  </script>
+</body>
+</html>
