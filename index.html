@@ -1394,45 +1394,47 @@
           document.getElementById('guest-qr-modal').style.display = 'block';
         }
       }
+
+      // -------------------------------------------------------------
+      // 9. STANDALONE DIRECT INQUIRY MODE (?inquire=true or #inquiry)
+      // -------------------------------------------------------------
+      const urlParamsCheck = new URLSearchParams(window.location.search);
+      if (urlParamsCheck.get('inquire') === 'true' || window.location.hash === '#inquiry') {
+        const style = document.createElement('style');
+        style.innerHTML = `
+          body > *:not(#builder-modal) {
+            display: none !important;
+          }
+          #builder-modal {
+            display: flex !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            position: fixed !important;
+            inset: 0 !important;
+            background: #0d0e10 !important;
+            z-index: 999999 !important;
+            padding: 0 !important;
+          }
+          #builder-modal .builder-overlay {
+            display: none !important;
+          }
+          #builder-modal .builder-window {
+            width: 100vw !important;
+            max-width: 900px !important;
+            height: 94vh !important;
+            max-height: 880px !important;
+            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            margin: auto;
+          }
+          #builder-close-btn {
+            display: none !important;
+          }
+        `;
+        document.head.appendChild(style);
+        builderModal.classList.add('open');
+      }
     });
   </script>
- 
-<script>
-  (function() {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('inquire') === 'true' || window.location.hash === '#inquiry') {
-      // 1. Add CSS to hide the background page and display only the modal
-      const style = document.createElement('style');
-      style.innerHTML = `
-        body > *:not(#bookingModal):not(.modal):not(.configurator-modal) {
-          display: none !important;
-        }
-        .modal, #bookingModal, .configurator-modal {
-          display: block !important;
-          position: fixed !important;
-          inset: 0 !important;
-          width: 100vw !important;
-          height: 100vh !important;
-          background: #0d0d0d !important;
-          z-index: 999999 !important;
-          overflow-y: auto !important;
-          padding: 20px 10px !important;
-        }
-        .close-btn, .modal-close, [data-close-modal], button:has(svg path[d*="close"]) {
-          display: none !important;
-        }
-      `;
-      document.head.appendChild(style);
-
-      // 2. Trigger the modal opener so all buttons, steps, and pricing activate
-      window.addEventListener('DOMContentLoaded', () => {
-        const btn = document.querySelector('[data-open-modal], .enquire-btn, #enquireBtn') ||
-                    Array.from(document.querySelectorAll('button, a')).find(el => el.textContent.trim().toLowerCase().includes('enquire now'));
-        if (btn) btn.click();
-      });
-    }
-  })();
-</script>
 </body>
 </html>
-
