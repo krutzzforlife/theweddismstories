@@ -1396,5 +1396,21 @@
       }
     });
   </script>
+  ... your existing code ...
+  </script>
+
+  <!-- PASTE IT RIGHT HERE -->
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      if (window.location.hash === '#inquiry' || window.location.search.includes('inquiry')) {
+        const openBtn = document.querySelector('[data-open-modal], .enquire-btn, #enquireBtn, a[href="#inquiry"]') ||
+                        Array.from(document.querySelectorAll('button, a')).find(el => el.textContent.trim().toLowerCase().includes('enquire now'));
+        if (openBtn) openBtn.click();
+      }
+    });
+  </script>
+
+</body>
+</html>
 </body>
 </html>
